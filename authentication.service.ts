@@ -1,22 +1,24 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { Logger } from '../shared/logger.service';
 import { Broadcaster } from '../shared/broadcaster.service';
 
 @Injectable()
 export class AuthenticationService {
   private authToken: string = '';
 
-  constructor(private router: Router, 
+  constructor(private router: Router,
+              private logger: Logger,
               private broadcaster: Broadcaster) {
-    
+
   }
 
-  isLoggedIn(): Boolean {
+  isLoggedIn(): boolean {
     let token = localStorage.getItem('auth_token');
     if (token){
       this.authToken = token;
-      return true;      
+      return true;
     }
     let params = this.getUrlParams();
     if ('token' in params) {

@@ -1,6 +1,3 @@
-import { MockHttp } from './../shared/mock-http';
-import Globals = require('./../shared/globals');
-
 import { Injectable } from '@angular/core';
 import { Headers, Http } from '@angular/http';
 import { Logger } from '../shared/logger.service';
@@ -9,7 +6,7 @@ import { Broadcaster } from '../shared/broadcaster.service';
 import 'rxjs/add/operator/toPromise';
 
 import { AuthenticationService } from '../auth/authentication.service';
-import { User } from '../models/user';
+import { User } from './user';
 
 @Injectable()
 export class UserService {

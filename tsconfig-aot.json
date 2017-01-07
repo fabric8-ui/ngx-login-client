@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "module": "commonjs",
+    "module": "es2015",
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -9,12 +9,16 @@
     "sourceMap": true,
     "noEmitHelpers": true,
     "strictNullChecks": false,
-    "baseUrl": "./src",
-    "paths": {
-    },
+    "removeComments": false,
+    "noImplicitAny": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "baseUrl": "",
+    "mapRoot": "",
+    "rootDir": ".",
+    "outDir": "lib",
     "lib": [
       "dom",
-      "es6"
+      "es2015"
     ],
     "types": [
       "hammerjs",
@@ -27,15 +31,9 @@
       "webpack"
     ]
   },
-  "exclude": [
-    "node_modules",
-    "dist"
-  ],
-  "awesomeTypescriptLoaderOptions": {
-    "forkChecker": true,
-    "useWebpackText": true
-  },
-  "compileOnSave": false,
-  "buildOnSave": false,
-  "atom": { "rewriteTsconfig": false }
+  "angularCompilerOptions": {
+    "genDir": "src/app/generated",
+    "entryModule": "src/app/app.module#AppModule",
+    "skipMetadataEmit" : true
+  }
 }

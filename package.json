@@ -1,11 +1,11 @@
 {
-  "name": "fabric8-planner",
-  "version": "0.0.9",
-  "description": "A planner front-end for Fabric8.",
+  "name": "ng-login",
+  "version": "0.0.1",
+  "description": "Auth and User services for Angular v2 and up.",
   "homepage": "",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fabric8io/fabric8-planner"
+    "url": "https://github.com/fabric8io/ng-login"
   },
   "contributors": [
     {
