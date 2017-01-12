@@ -2,7 +2,6 @@
   "name": "ng-login",
   "version": "0.0.1",
   "description": "Auth and User services for Angular v2 and up.",
-  "homepage": "",
   "repository": {
     "type": "git",
     "url": "https://github.com/fabric8io/ng-login"
@@ -26,6 +25,22 @@
     }
   ],
   "license": "Apache-2.0",
+  "keywords": [
+    "angular",
+    "angular2",
+    "angular4",
+    "login",
+    "auth",
+    "user",
+    "fabric8"
+  ],
+  "bugs": {
+    "url": "https://github.com/fabric8io/ng-login/issues"
+  },
+  "main": "bundles/ng2-login.umd.js",
+  "module": "index.js",
+  "typings": "index.d.ts",
+  "homepage": "https://github.com/fabric8io/ng-login",
   "scripts": {
     "build": "webpack --config config/webpack.dev.js",
     "build:prod": "webpack --config config/webpack.prod.js -p",
