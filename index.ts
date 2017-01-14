@@ -1,35 +1,43 @@
 import './rxjs-extensions';
 
 import { ModuleWithProviders, NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { HttpModule }    from '@angular/http';
+// import { BrowserModule } from '@angular/platform-browser';
+// import { HttpModule }    from '@angular/http';
 
 // Shared
 import { AuthenticationService } from './src/app/auth/authentication.service';
-import { Broadcaster } from './src/app/shared/broadcaster.service';
-import { UserService } from './src/app/user/user.service';
-import { Logger } from './src/app/shared/logger.service';
 
-// App components
-import { AppComponent } from './app.component';
-import { AppRoutingModule } from './app-routing.module';
+import { Broadcaster } from './src/app/shared/broadcaster.service';
+import { Logger }      from './src/app/shared/logger.service';
+
+import { UserService } from './src/app/user/user.service';
 
 
 @NgModule({
   imports: [
-    AppRoutingModule,
-    BrowserModule,
-    HttpModule,
+    // BrowserModule,
+    // HttpModule,
   ],
   declarations: [
-    AppComponent,
+    AuthenticationService,
+    UserService
   ],
   providers: [
-    Logger,
     AuthenticationService,
     Broadcaster,
+    Logger,
     UserService,
   ],
-  bootstrap: [ AppComponent ]
+  exports: [
+
+  ]
 })
-export class LoginModule { }
+export class LoginModule {
+  /* optional: in case you need users to override your providers */
+  static forRoot(configuredProviders: Array<any>): ModuleWithProviders {
+    return {
+      ngModule: LoginModule,
+      providers: configuredProviders
+    };
+  }
+}

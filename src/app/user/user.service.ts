@@ -21,12 +21,7 @@ export class UserService {
               private auth: AuthenticationService,
               private broadcaster: Broadcaster) {
 
-    if (Globals.inTestMode) {
-      logger.log('UserService running in ' + process.env.ENV + ' mode.');
-      this.http = new MockHttp(logger);
-    } else {
-      logger.log('UserService running in production mode.');
-    }
+    logger.log('UserService running in production mode.');
     logger.log('UserService using user url ' + this.userUrl + ' identity url ' + this.identitiesUrl);
 
     this.broadcaster.on<string>('logout')
