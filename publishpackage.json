@@ -1,29 +1,47 @@
 {
-  "name": "ng2-your-library",
-  "version": "0.0.0",
-  "description": "Your library description.",
-  "main": "ng2-your-library",
-  "typings": "index.d.ts",
-  "nativescript": {
-    "platforms": {
-      "android": "2.4.0",
-      "ios": "2.4.0"
-    }
-  },
+  "name": "ng-login",
+  "version": "0.0.1",
+  "description": "Auth and User services for Angular v2 and up. Requires backend REST service.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/preboot/angular2-library-seed.git"
+    "url": "https://github.com/fabric8io/ng-login"
   },
+  "contributors": [
+    {
+      "name": "Joshua Wilson",
+      "email": "josh@redhat.com"
+    },
+    {
+      "name": "Nimisha",
+      "email": "nmukherj@redhat.com"
+    },
+    {
+      "name": "Sudipta Sen",
+      "email": "sudsen@redhat.com"
+    },
+    {
+      "name": "Vikram Raj",
+      "email": "viraj@redhat.com"
+    }
+  ],
+  "license": "Apache-2.0",
   "keywords": [
     "angular",
-    "ng2"
+    "angular2",
+    "angular4",
+    "ng",
+    "login",
+    "auth",
+    "user",
+    "fabric8"
   ],
-  "author": "Your Name <yourname@yourdomain.com>",
-  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/preboot/angular2-library-seed/issues"
+    "url": "https://github.com/fabric8io/ng-login/issues"
   },
-  "homepage": "https://github.com/preboot/angular2-library-seed#readme",
+  "main": "ng2-login.umd.js",
+  "module": "index.js",
+  "typings": "index.d.ts",
+  "homepage": "https://github.com/fabric8io/ng-login",
   "scripts": {
   },
   "dependencies": {
