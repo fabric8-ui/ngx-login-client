@@ -9,7 +9,8 @@
   "license": "Apache-2.0",
   "scripts": {
     "build-x": "webpack --config config/webpack.dev.js",
-    "build": "rimraf dist && webpack --progress --profile --bail",
+    "build-y": "rimraf dist && webpack --progress --profile --bail",
+    "build": "tsc --p tsconfig-build.json",
     "build:prod": "webpack --config config/webpack.prod.js -p",
     "check-coverage": "istanbul check-coverage --statements 23 --branches 5 --functions 9 --lines 24",
     "ci": "npm run e2e && npm run test",

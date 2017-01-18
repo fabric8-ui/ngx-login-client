@@ -2,7 +2,7 @@
   "name": "ng-login",
   "version": "0.0.1",
   "description": "Auth and User services for Angular v2 and up. Requires backend REST service.",
-  "main": "ng2-login.umd.js",
+  "main": "ng-login.umd.js",
   "module": "ng-login.js",
   "typings": "ng-login.d.ts",
   "repository": {
@@ -43,6 +43,7 @@
     "fabric8"
   ],
   "scripts": {
+    "build": "tsc -p tsconfig-build.json",
   },
   "dependencies": {
   },

@@ -2,10 +2,17 @@
   "name": "ng-login",
   "version": "0.0.1",
   "description": "Auth and User services for Angular v2 and up. Requires backend REST service.",
+  "main": "ng-login.umd.js",
+  "module": "ng-login.js",
+  "typings": "ng-login.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/fabric8io/ng-login"
   },
+  "bugs": {
+    "url": "https://github.com/fabric8io/ng-login/issues"
+  },
+  "homepage": "https://github.com/fabric8io/ng-login",
   "contributors": [
     {
       "name": "Joshua Wilson",
@@ -29,21 +36,16 @@
     "angular",
     "angular2",
     "angular4",
+    "ng",
     "login",
     "auth",
     "user",
     "fabric8"
   ],
-  "bugs": {
-    "url": "https://github.com/fabric8io/ng-login/issues"
-  },
-  "main": "bundles/ng2-login.umd.js",
-  "module": "index.js",
-  "typings": "index.d.ts",
-  "homepage": "https://github.com/fabric8io/ng-login",
   "scripts": {
     "build-x": "webpack --config config/webpack.dev.js",
-    "build": "rimraf dist && webpack --progress --profile --bail",
+    "build-y": "rimraf dist && webpack --progress --profile --bail",
+    "build": "tsc -p tsconfig-build.json",
     "build:prod": "webpack --config config/webpack.prod.js -p",
     "check-coverage": "istanbul check-coverage --statements 23 --branches 5 --functions 9 --lines 24",
     "ci": "npm run e2e && npm run test",
