@@ -12,7 +12,7 @@
     "copy-files": "cp LICENSE README.md package.json dist",
     "bundle": "rollup -c",
     "minify": "uglifyjs dist/bundles/login.umd.js --screw-ie8 --compress --mangle --comments --output dist/bundles/login.umd.min.js",
-    "transpile": "./node_modules/bin/ngc",
+    "transpile": "./node_modules/.bin/ngc",
 
 
     "check-coverage": "istanbul check-coverage --statements 23 --branches 5 --functions 9 --lines 24",
