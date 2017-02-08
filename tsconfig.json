@@ -3,32 +3,35 @@
     "target": "es5",
     "module": "es2015",
     "moduleResolution": "node",
+    "declaration": true,
+    "stripInternal": true,
+    "skipLibCheck": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
+    "inlineSources": true,
     "noEmitHelpers": true,
     "strictNullChecks": false,
     "noUnusedLocals": true,
     "noImplicitAny": true,
-    "baseUrl": "./src",
+    "baseUrl": ".",
+    "rootDir": ".",
+    "outDir": "dist",
+
     "paths": {
+      "@angular/core": ["node_modules/@angular/core"],
+      "@angular/http": ["node_modules/@angular/http"],
+      "rxjs/*": ["node_modules/rxjs/*"]
     },
     "lib": [
-      "dom",
-      "es6"
-    ],
-    "types": [
-      "hammerjs",
-      "jasmine",
-      "node",
-      "protractor",
-      "selenium-webdriver",
-      "source-map",
-      "uglify-js",
-      "webpack"
+      "es2015",
+      "dom"
     ]
   },
+  "files": [
+    "index.ts"
+  ],
   "exclude": [
     "node_modules",
     "dist"
