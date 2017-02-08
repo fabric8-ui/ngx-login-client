@@ -13,7 +13,6 @@
     "inlineSources": true,
     "noEmitHelpers": true,
     "strictNullChecks": false,
-    "noUnusedLocals": true,
     "noImplicitAny": true,
     "baseUrl": ".",
     "rootDir": ".",

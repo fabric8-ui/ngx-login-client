@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
 
 import { Broadcaster } from '../shared/broadcaster.service';
 
@@ -7,10 +6,7 @@ import { Broadcaster } from '../shared/broadcaster.service';
 export class AuthenticationService {
   private authToken: string = '';
 
-  constructor(private router: Router, 
-              private broadcaster: Broadcaster) {
-    
-  }
+  constructor(private broadcaster: Broadcaster) { }
 
   isLoggedIn(): Boolean {
     let token = localStorage.getItem('auth_token');
@@ -18,7 +14,7 @@ export class AuthenticationService {
       this.authToken = token;
       return true;      
     }
-    let params = this.getUrlParams();
+    let params:any = this.getUrlParams();
     if ('token' in params) {
       this.authToken = params['token'];
       localStorage.setItem('auth_token', this.authToken);
@@ -44,9 +40,9 @@ export class AuthenticationService {
 
   getUrlParams(): Object {
     let query = window.location.search.substr(1);
-    let result = {};
+    let result:any = {};
     query.split('&').forEach(function(part) {
-      let item = part.split('=');
+      let item:any = part.split('=');
       result[item[0]] = decodeURIComponent(item[1]);
     });
     return result;
