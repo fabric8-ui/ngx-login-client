@@ -31,11 +31,12 @@ node_modules
 #IntelliJ configuration files
 .idea
 
-dist
+#dist
 dev
 docs
 lib
 test
+src
 
 Thumbs.db
 .DS_Store
@@ -55,6 +56,7 @@ CONTRIBUTING.md
 karma-shim.js
 karma.conf.js
 protractor.conf.js
+stats.json
 tsconfig.json
 tslint.json
 typedoc.json
