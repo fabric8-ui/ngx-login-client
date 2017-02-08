@@ -17,7 +17,6 @@
     "baseUrl": ".",
     "rootDir": ".",
     "outDir": "dist",
-
     "paths": {
       "@angular/core": ["node_modules/@angular/core"],
       "@angular/http": ["node_modules/@angular/http"],
@@ -30,10 +29,6 @@
   },
   "files": [
     "index.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
   ],
   "awesomeTypescriptLoaderOptions": {
     "forkChecker": true,
