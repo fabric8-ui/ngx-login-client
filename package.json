@@ -8,10 +8,13 @@
   },
   "license": "Apache-2.0",
   "scripts": {
-    "build-x": "webpack --config config/webpack.dev.js",
-    "build-y": "rimraf dist && webpack --progress --profile --bail",
-    "build": "tsc -p tsconfig-build.json",
-    "build:prod": "webpack --config config/webpack.prod.js -p",
+    "build": "npm run clean-dist && npm run transpile && npm run copy-files npm run bundle && npm run minify",
+    "copy-files": "cp LICENSE README.md package.json dist",
+    "bundle": "rollup -c",
+    "minify": "uglifyjs dist/bundles/login.umd.js --screw-ie8 --compress --mangle --comments --output dist/bundles/login.umd.min.js",
+    "transpile": "./node_modules/bin/ngc",
+
+
     "check-coverage": "istanbul check-coverage --statements 23 --branches 5 --functions 9 --lines 24",
     "ci": "npm run e2e && npm run test",
     "clean":          "rimraf node_modules doc dist && npm cache clean",
@@ -19,7 +22,6 @@
     "clean-dist":     "rimraf dist",
     "clean-install":  "npm run clean && npm install",
     "clean-start":    "npm run clean-install && npm start",
-    "copy-files": "cpy src/index.html src/favicon.ico dist",
     "docker:run": "webpack-dev-server --inline --progress --port 8080",
     "docs": "typedoc --options typedoc.json src/app/app.component.ts",
     "e2e": "protractor",
@@ -58,28 +60,20 @@
     "watch:test": "npm run test:unit -- --auto-watch --no-single-run"
 
   },
-  "dependencies": {
-    "@angular/common": "2.1.1",
-    "@angular/compiler": "2.1.1",
-    "@angular/compiler-cli": "2.1.1",
-    "@angular/core": "2.1.1",
-    "@angular/forms": "2.1.1",
-    "@angular/http": "2.1.1",
-    "@angular/platform-browser": "2.1.1",
-    "@angular/platform-browser-dynamic": "2.1.1",
-    "@angular/platform-server": "2.1.1",
-    "@angular/router": "3.1.1",
-    "@angular/upgrade": "2.1.1",
-    "angular-in-memory-web-api": "0.1.13",
-    "core-js": "^2.4.1",
-    "lodash": "4.17.2",
-    "reflect-metadata": "0.1.8",
-    "rxjs": "5.0.0-beta.12",
-    "zone.js": "^0.6.26"
+  "peerDependencies": {
+    "@angular/core": "^2.0.0",
+    "@angular/http": "^2.0.0"
   },
   "devDependencies": {
-    "@angularclass/hmr": "^1.0.1",
-    "@angularclass/hmr-loader": "^3.0.2",
+    "@angular/common": "2.2.3",
+    "@angular/compiler": "2.2.3",
+    "@angular/compiler-cli": "2.2.3",
+    "@angular/core": "2.2.3",
+    "@angular/http": "2.2.3",
+    "core-js": "^2.4.1",
+    "reflect-metadata": "0.1.8",
+    "rxjs": "5.0.0-beta.12",
+    "zone.js": "^0.6.26",
     "@types/core-js": "^0.9.34",
     "@types/jasmine": "^2.5.35",
     "@types/node": "^6.0.45",
