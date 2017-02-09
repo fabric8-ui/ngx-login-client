@@ -8,7 +8,7 @@ export class AuthenticationService {
 
   constructor(private broadcaster: Broadcaster) { }
 
-  isLoggedIn(): Boolean {
+  isLoggedIn(): boolean {
     let token = localStorage.getItem('auth_token');
     if (token){
       this.authToken = token;

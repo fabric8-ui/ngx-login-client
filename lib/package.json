@@ -2,15 +2,15 @@
   "name": "ng-login",
   "version": "0.0.1",
   "description": "Auth and User services for Angular v2 and up. Requires backend REST service.",
-  "main": "dist/bundles/login.umd.js",
-  "module": "dist/index.js",
+  "main": "bundles/login.umd.js",
+  "module": "index.js",
+  "typings": "index.d.ts",
   "scripts": {
-    "build": "npm run remove-dist && npm run transpile && npm run bundle && npm run minify && npm run copy-files",
+    "build": "npm run cleanup && npm run transpile && npm run bundle && npm run minify && npm run copy-files",
     "bundle": "rollup -c",
     "clean": "npm cache clean && npm run rimraf -- node_modules doc coverage dist",
-    "cleanup": "rimraf dist/package.json dist/bundles dist/src dist/index.d.ts dist/index.metadata.json dist/index.js dist/index.js.map dist/LICENSE dist/README.md",
-    "remove-dist": "rimraf dist",
-    "copy-files": "cp LICENSE README.md lib/package.json dist",
+    "cleanup": "rimraf dist/bundles dist/src dist/index.d.ts dist/index.metadata.json dist/index.js dist/index.js.map dist/LICENSE dist/README.md",
+    "copy-files": "copyfiles LICENSE README.md package.json dist",
     "minify": "uglifyjs dist/bundles/login.umd.js --screw-ie8 --compress --mangle --comments --output dist/bundles/login.umd.min.js",
     "reinstall": "npm run clean && npm install",
     "rimraf": "rimraf",
@@ -93,6 +93,5 @@
     "webpack-merge": "^0.14.0",
     "webpack-validator": "2.1.3",
     "uglify-js": "^2.7.5"
-
   }
 }
