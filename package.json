@@ -11,7 +11,7 @@
     "clean": "npm cache clean && npm run rimraf -- node_modules doc coverage dist",
     "cleanup": "rimraf dist/package.json dist/bundles dist/src dist/index.d.ts dist/index.metadata.json dist/index.js dist/index.js.map dist/LICENSE dist/README.md",
     "remove-dist": "rimraf dist",
-    "copy-files": "cp LICENSE README.md lib/package.json dist",
+    "copy-files": "copyfiles -f LICENSE README.md lib/package.json dist",
     "minify": "uglifyjs dist/bundles/login.umd.js --screw-ie8 --compress --mangle --comments --output dist/bundles/login.umd.min.js",
     "reinstall": "npm run clean && npm install",
     "rimraf": "rimraf",
