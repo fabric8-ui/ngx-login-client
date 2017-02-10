@@ -1,5 +1,5 @@
 {
-  "name": "ng-login",
+  "name": "ngx-login-client",
   "version": "0.0.1",
   "description": "Auth and User services for Angular v2 and up. Requires backend REST service.",
   "main": "dist/bundles/login.umd.js",
