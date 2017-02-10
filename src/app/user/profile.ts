@@ -1,4 +1,4 @@
-import { Email } from './email';
+// import { Email } from './email';
 
 export class Profile {
     fullName: string;
