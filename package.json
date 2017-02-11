@@ -1,6 +1,6 @@
 {
   "name": "ngx-login-client",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Auth and User services for Angular v2 and up. Requires backend REST service.",
   "main": "dist/bundles/login.umd.js",
   "module": "dist/index.js",
@@ -10,10 +10,11 @@
     "bundle": "rollup -c",
     "clean": "npm cache clean && npm run rimraf -- node_modules doc coverage dist",
     "cleanup": "rimraf dist/package.json dist/bundles dist/src dist/index.d.ts dist/index.metadata.json dist/index.js dist/index.js.map dist/LICENSE dist/README.md",
-    "remove-dist": "rimraf dist",
     "copy-files": "copyfiles -f LICENSE README.md lib/package.json dist",
     "minify": "uglifyjs dist/bundles/login.umd.js --screw-ie8 --compress --mangle --comments --output dist/bundles/login.umd.min.js",
+    "prepublish": "npm run build",
     "reinstall": "npm run clean && npm install",
+    "remove-dist": "rimraf dist",
     "rimraf": "rimraf",
     "transpile": "./node_modules/.bin/ngc"
   },
@@ -66,6 +67,7 @@
   "devDependencies": {
     "@angular/core": "2.2.3",
     "@angular/http": "2.2.3",
+    "@angular/router": "3.2.3",
     "core-js": "^2.4.1",
     "reflect-metadata": "0.1.8",
     "rxjs": "5.0.0-beta.12",

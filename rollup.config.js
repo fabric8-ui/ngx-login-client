@@ -7,6 +7,7 @@ export default {
   globals: {
     '@angular/core': 'ng.core',
     '@angular/http': 'ng.http',
+    '@angular/router': 'ng.router',
     'rxjs/Observable': 'Rx',
     'rxjs/Subject': 'Rx',
     'rxjs/ReplaySubject': 'Rx',

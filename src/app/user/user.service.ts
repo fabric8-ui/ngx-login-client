@@ -18,7 +18,7 @@ export class UserService {
 
   private headers = new Headers({'Content-Type': 'application/json'});
   private userUrl = process.env.API_URL + 'user';  // URL to web api
-  private identitiesUrl = process.env.API_URL + 'identities';  // URL to web api
+  private usersUrl = process.env.API_URL + 'users';  // URL to web api
 
 
   constructor(private http: Http,
@@ -72,7 +72,13 @@ export class UserService {
           this.broadcaster.broadcast('currentUserInit', this.userData);
           return this.userData;
         })
-        .catch (this.handleError);
+        .catch ((e) => {
+          if (e.status === 401) {
+            this.auth.logout(true);
+          } else {
+            this.handleError(e);
+          }
+        });
     }
   }
 

@@ -1,3 +1,4 @@
+import { Router } from '@angular/router';
 import { Injectable } from '@angular/core';
 
 import { Broadcaster } from '../shared/broadcaster.service';
@@ -6,7 +7,8 @@ import { Broadcaster } from '../shared/broadcaster.service';
 export class AuthenticationService {
   private authToken: string = '';
 
-  constructor(private broadcaster: Broadcaster) { }
+  constructor(private router: Router,
+              private broadcaster: Broadcaster) { }
 
   isLoggedIn(): boolean {
     let token = localStorage.getItem('auth_token');
@@ -23,10 +25,13 @@ export class AuthenticationService {
     return false;
   }
 
-  logout() {
+  logout(redirect: boolean = false) {
     this.authToken = '';
     localStorage.removeItem('auth_token');
     this.broadcaster.broadcast('logout', 1);
+    if (redirect) {
+      this.router.navigate(['login']);
+    }
   }
 
   getToken() {
