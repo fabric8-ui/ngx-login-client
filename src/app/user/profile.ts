@@ -3,9 +3,11 @@
 export class Profile {
     fullName: string;
     imageURL: string;
+    username: string;
     bio?: string;
-    username?: string;
     url?: string;
+    provider?: string;
+    email?: string;
     emails?: string[];
     primaryEmail?: string;
     notificationEmail?: string;

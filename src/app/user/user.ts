@@ -5,4 +5,7 @@ export class User implements Entity {
   attributes: Profile;
   id: string;
   type: string;
+  links: {
+    self: string;
+  }
 }
