@@ -25,25 +25,26 @@ There are several services and a couple of models used by them available.
        Profile     
     LoggerService
  
- ## Building it
+
+## Building it 
  
- ####Install the dependencies:
+#### Install the dependencies:
  
  `npm install`
  
- ####If you need to update the dependencies you can reinstall:
+#### If you need to update the dependencies you can reinstall:
  
  `npm run reinstall`
  
- ####Run the tests:
+#### Run the tests:
  
  `npm test`
  
- ####Build the library:
+#### Build the library:
  
  `npm run build`
  
- ####Try it out locally. 
+#### Try it out locally. 
  
  We found that `npm link` doesn't fully work. You have to reference the library via `file:`. But you still need to create the link.
  
@@ -60,10 +61,8 @@ There are several services and a couple of models used by them available.
    `"ngx-login-client": "file:/[LOCATION-TO-NODE-MODULES]/.nvm/versions/node/v6.9.1/lib/node_modules/ngx-login-client"`
  
  
- ####To publish it to NPM:
+#### To publish it to NPM:
  
- `npm publish dist/` (_we don't want to publish the whole repo, just the built parts_)
- 
- 
- 
- 
+ `npm publish dist/`  
+(_we don't want to publish the whole repo, just the built parts_)
+
