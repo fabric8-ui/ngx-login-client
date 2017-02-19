@@ -14,7 +14,7 @@ export class AuthenticationService {
     let token = localStorage.getItem('auth_token');
     if (token) {
       this.authToken = token;
-      return true;      
+      return true;
     }
     let params:any = this.getUrlParams();
     if ('token' in params) {
