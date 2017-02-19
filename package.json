@@ -1,6 +1,6 @@
 {
   "name": "ngx-login-client",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Auth and User services for Angular v2 and up. Requires backend REST service.",
   "main": "bundles/login.umd.js",
   "module": "index.js",
@@ -61,8 +61,7 @@
     "node": ">= 6.9.1",
     "npm": ">= 3"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "peerDependencies": {
     "@angular/core": "^2.0.0",
     "@angular/http": "^2.0.0"
