@@ -24,6 +24,30 @@ There are several services and a couple of models used by them available.
        User
        Profile     
     LoggerService
+  
+You must provide the URL to API to do the login. To do this, you must provide 
+a `string` with an OpaqueToken `AUTH_API_URL` from `ngx-login-client`. We suggest using a
+factory provider for this. For example:
+
+````
+import { ApiLocatorService } from './api-locator.service';
+import { AUTH_API_URL } from 'ngx-login-client';
+
+let authApiUrlFactory = (api: ApiLocatorService) => {
+  return api.witApiUrl;
+};
+
+export let authApiUrlProvider = {
+  provide: AUTH_API_URL,
+  useFactory: authApiUrlFactory,
+  deps: [ApiLocatorService]
+};
+````
+
+NOTE: `ApiLocatorService` is a service that we use to construct API URLs using patterns determined
+by our application architecture, you can implement this part however you like.
+
+Finally you need to register `authApiUrlProvider` with a module or a component.
  
 
 ## Building it 
