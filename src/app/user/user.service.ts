@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { Headers, Http } from '@angular/http';
 
 import 'rxjs/add/operator/toPromise';
@@ -6,6 +6,7 @@ import 'rxjs/add/operator/toPromise';
 import { Broadcaster } from '../shared/broadcaster.service';
 import { AuthenticationService } from '../auth/authentication.service';
 import { Logger } from '../shared/logger.service';
+import { AUTH_API_URL } from './../shared/auth-api';
 import { User } from './user';
 
 //import { ProfileService } from './../profile/profile.service';
@@ -17,17 +18,19 @@ export class UserService {
   allUserData: User[] = [];
 
   private headers = new Headers({'Content-Type': 'application/json'});
-  private userUrl = process.env.API_URL + 'user';  // URL to web api
-  private usersUrl = process.env.API_URL + 'users';  // URL to web api
+  private userUrl: string;  // URL to web api
+  private usersUrl: string;  // URL to web api
 
 
   constructor(private http: Http,
               private logger: Logger,
               private auth: AuthenticationService,
-              private broadcaster: Broadcaster
+              private broadcaster: Broadcaster,
+              @Inject(AUTH_API_URL) apiUrl: string
               //private profile: ProfileService
   ) {
-
+    this.userUrl = apiUrl + 'user';
+    this.usersUrl = apiUrl + 'users';
     this.broadcaster.on<string>('logout')
       .subscribe(message => {
         this.resetUser();
