@@ -1,23 +1,12 @@
-import './rxjs-extensions';
-
-import { NgModule, Pipe, PipeTransform } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NgModule } from '@angular/core';
 import { Http, HttpModule } from "@angular/http";
-
-// import { DropdownModule } from 'ngx-dropdown';
 
 import { AlmUserName } from './src/app/user/alm-user-name.pipe';
 
-export { AlmUserName } from './src/app/user/alm-user-name.pipe';
-
-
 @NgModule({
   imports: [
-    FormsModule,
     Http,
     HttpModule,
-    Pipe,
-    ReactiveFormsModule
   ],
   declarations: [
 
