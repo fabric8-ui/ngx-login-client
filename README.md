@@ -74,7 +74,7 @@ Finally you need to register `authApiUrlProvider` with a module or a component.
  
  - Start by running:
  
-   `npm link dist`
+   `npm link dist/`
  
  - Change this:
  
@@ -82,7 +82,7 @@ Finally you need to register `authApiUrlProvider` with a module or a component.
    
  - to this:
  
-   `"ngx-login-client": "file:/[LOCATION-TO-NODE-MODULES]/.nvm/versions/node/v6.9.1/lib/node_modules/ngx-login-client"`
+   `"ngx-login-client": "file:///[LOCATION-TO-NODE-MODULES]/.nvm/versions/node/v6.9.1/lib/node_modules/ngx-login-client"`
  
  
 #### To publish it to NPM:
