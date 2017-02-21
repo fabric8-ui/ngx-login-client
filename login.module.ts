@@ -9,10 +9,10 @@ import { AlmUserName } from './src/app/user/alm-user-name.pipe';
     HttpModule,
   ],
   declarations: [
-
+    AlmUserName
   ],
   exports: [
-    AlmUserName,
+    AlmUserName
   ]
 })
 export class LoginModule {
