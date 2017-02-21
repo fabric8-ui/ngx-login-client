@@ -6,7 +6,7 @@ import 'rxjs/add/operator/toPromise';
 import { Broadcaster } from '../shared/broadcaster.service';
 import { AuthenticationService } from '../auth/authentication.service';
 import { Logger } from '../shared/logger.service';
-import { AUTH_API_URL } from './../shared/auth-api';
+import { AUTH_API_URL } from '../shared/auth-api';
 import { User } from './user';
 
 //import { ProfileService } from './../profile/profile.service';
