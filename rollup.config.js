@@ -1,7 +1,7 @@
 export default {
   entry: 'dist/index.js',
   dest: 'dist/bundles/login.umd.js',
-  sourceMap: false,
+  sourceMap: true,
   format: 'umd',
   moduleName: 'ng.login',
   globals: {
