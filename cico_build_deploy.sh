@@ -50,13 +50,14 @@ docker exec ngx-login-client-builder ./run_functional_tests.sh
 
 if [ $? -eq 0 ]; then
   echo 'CICO: functional tests OK'
+  # Don't treat a publish failure as a build failure as this is confusing
+  set +e
   # Publish to npm
   docker exec ngx-login-client-builder npm run semantic-release
   if [ $? -eq 0 ]; then
     echo 'CICO: module pushed to npmjs.com'
     exit 0
   else
-    # Don't treat a publish failure as a build failure as this is confusing
     echo 'CICO: module push to npmjs.com failed'
     exit 0
   fi
