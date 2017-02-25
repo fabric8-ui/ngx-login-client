@@ -76,6 +76,7 @@
     "@angular/core": "2.2.3",
     "@angular/http": "2.2.3",
     "@angular/router": "3.2.3",
+    "@krux/condition-jenkins": "^1.0.1",
     "@types/jasmine": "2.5.41",
     "@types/lodash": "4.14.49",
     "angular2-load-children-loader": "^0.1.3",
