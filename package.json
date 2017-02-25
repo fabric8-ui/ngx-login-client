@@ -14,14 +14,14 @@
     "cleanup": "rimraf dist/package.json dist/bundles dist/src dist/index.d.ts dist/index.metadata.json dist/index.js dist/index.js.map dist/LICENSE dist/README.md",
     "commitmsg": "validate-commit-msg",
     "copy-files": "copyfiles LICENSE README.md package.json dist && copyfiles src/**/*.css dist && copyfiles src/**/*.html dist",
-    "copy-dist-files": "copyfiles LICENSE README.md package.json .git/** index.js dist",
+    "copy-dist-files": "copyfiles LICENSE README.md package.json index.js dist",
     "minify": "uglifyjs dist/bundles/login.umd.js --screw-ie8 --compress --mangle --comments --output dist/bundles/login.umd.min.js",
     "reinstall": "npm run clean && npm install",
     "remove-dist": "rimraf dist",
     "rimraf": "rimraf",
     "test": "karma start",
     "transpile": "./node_modules/.bin/ngc",
-    "semantic-release": "semantic-release pre && npm run build && npm publish dist/ && semantic-release post"
+    "semantic-release": "semantic-release pre && npm run build && cp -r .git dist && npm publish dist/ && semantic-release post"
   },
   "license": "Apache-2.0",
   "contributors": [
@@ -76,7 +76,6 @@
     "@angular/core": "2.2.3",
     "@angular/http": "2.2.3",
     "@angular/router": "3.2.3",
-    "@krux/condition-jenkins": "^1.0.1",
     "@types/jasmine": "2.5.41",
     "@types/lodash": "4.14.49",
     "angular2-load-children-loader": "^0.1.3",
