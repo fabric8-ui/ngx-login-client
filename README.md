@@ -1,4 +1,7 @@
 # ngx-login-client
+
+[![Build Status](https://ci.centos.org/buildStatus/icon?job=devtools-ngx-login-client-npm-publish-build-master)](https://ci.centos.org/view/Devtools/job/devtools-ngx-login-client-npm-publish-build-master/)
+
 Auth and User services for Angular v2 and up
 
 This library requires a server side component to perform the authentication. The one we 
