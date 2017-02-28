@@ -61,7 +61,9 @@ export class AuthenticationService {
       let refreshInMs = Math.round(refreshInSeconds * .9) * 1000;
       console.log('Refreshing token in: ' + refreshInMs + ' milliseconds.');
       this.refreshInterval = refreshInMs;
-      this.clearTimeoutId = setTimeout(() => this.refreshToken(), refreshInMs);
+      if (process.env.ENV !== 'inmemory') {
+        this.clearTimeoutId = setTimeout(() => this.refreshToken(), refreshInMs);
+      }
     }
   }
 
