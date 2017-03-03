@@ -1,12 +1,11 @@
 import { NgModule } from '@angular/core';
-import { Http, HttpModule } from "@angular/http";
+import { HttpModule } from '@angular/http';
 
 import { AlmUserName } from './src/app/user/alm-user-name.pipe';
 
 @NgModule({
   imports: [
-    Http,
-    HttpModule,
+    HttpModule
   ],
   declarations: [
     AlmUserName
