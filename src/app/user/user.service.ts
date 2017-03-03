@@ -77,7 +77,7 @@ export class UserService {
         })
         .catch ((e) => {
           if (e.status === 401) {
-            this.auth.logout(true);
+            this.auth.logout();
           } else {
             this.handleError(e);
           }

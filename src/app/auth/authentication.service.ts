@@ -1,4 +1,3 @@
-import { Router } from '@angular/router';
 import { Injectable, Inject } from '@angular/core';
 import { Http, Response, Headers } from '@angular/http';
 
@@ -8,52 +7,42 @@ import { AUTH_API_URL } from '../shared/auth-api';
 
 @Injectable()
 export class AuthenticationService {
-  private authToken: string = '';
   private refreshInterval: number;
   private apiUrl: string;
   private clearTimeoutId: any;
 
-  constructor(private router: Router,
-              private broadcaster: Broadcaster,
+  constructor(private broadcaster: Broadcaster,
               @Inject(AUTH_API_URL) apiUrl: string,
               private http: Http) {
     this.apiUrl = apiUrl;
   }
 
-  isLoggedIn(): boolean {
-    let token = localStorage.getItem('auth_token');
-    if (token) {
-      this.authToken = token;
-      // refresh the token in five seconds to make sure we have expiry and a running timer - only do this first time in
-      if(!this.refreshInterval) {
-        this.setupRefreshTimer(15);
-      }
-      return true;
-    }
-    let params: any = this.getUrlParams();
-    if ('token_json' in params) {
-      let tokenJson = decodeURIComponent(params['token_json']);
-      let token = this.processTokenResponse(JSON.parse(tokenJson));
-      this.setupRefreshTimer(token.expires_in);
-      return true;
-    }
-    return false;
+  logIn(tokenParameter: string): boolean {
+    let tokenJson = decodeURIComponent(tokenParameter);
+    let token = this.processTokenResponse(JSON.parse(tokenJson));
+    this.setupRefreshTimer(token.expires_in);
+    this.broadcaster.broadcast('loggedin', 1);
+    return true;
   }
 
-  logout(redirect: boolean = false) {
-    this.authToken = '';
+  logout() {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('refresh_token');
     clearTimeout(this.clearTimeoutId);
     this.refreshInterval = null;
     this.broadcaster.broadcast('logout', 1);
-    if (redirect) {
-      this.router.navigate(['login']);
+  }
+
+  isLoggedIn(): boolean {
+    let token = localStorage.getItem('auth_token');
+    if (token) {
+      return true;
     }
+    return false;
   }
 
   getToken() {
-    if (this.isLoggedIn()) return this.authToken;
+    if (this.isLoggedIn()) return localStorage.getItem('auth_token');
   }
 
   setupRefreshTimer(refreshInSeconds: number) {
@@ -86,20 +75,9 @@ export class AuthenticationService {
     }
   }
 
-  getUrlParams(): Object {
-    let query = window.location.search.substr(1);
-    let result: any = {};
-    query.split('&').forEach(function (part) {
-      let item: any = part.split('=');
-      result[item[0]] = decodeURIComponent(item[1]);
-    });
-    return result;
-  }
-
   processTokenResponse(response: any): Token {
     let token = response as Token;
-    this.authToken = token.access_token;
-    localStorage.setItem('auth_token', this.authToken);
+    localStorage.setItem('auth_token', token.access_token);
     localStorage.setItem('refresh_token', token.refresh_token);
     return token;
   }
