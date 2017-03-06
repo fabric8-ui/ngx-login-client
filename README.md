@@ -71,21 +71,39 @@ Finally you need to register `authApiUrlProvider` with a module or a component.
  
  `npm run build`
  
-#### Try it out locally. 
- 
- We found that `npm link` doesn't fully work. You have to reference the library via `file:`. But you still need to create the link.
- 
- - Start by running:
- 
-   `npm link dist/`
- 
- - Change this:
- 
-   `"ngx-login-client": "X.X.X"`
-   
- - to this:
- 
-   `"ngx-login-client": "file:///[LOCATION-TO-NODE-MODULES]/.nvm/versions/node/v6.9.1/lib/node_modules/ngx-login-client"`
+## Library Build
+
+### Production
+
+To build ngx-login-client as a npm library, use:
+
+----
+npm run build
+----
+
+Whilst the standalone build uses webpack the library build uses gulp.
+
+The created library is located in `dist`. You shouldn't ever publish the
+build manually, instead you should let the CD pipeline do a semantic release.
+
+### Development
+
+To build ngx-login-client as an npm library and embed it into a webapp such as
+fabric8-ui, you should:
+
+1. Run `npm run watch:library` in this directory. This will build ngx-login-client as
+a library and then set up a watch task to rebuild any ts, html and scss files you
+change.
+2. In the webapp into which you are embedding, run `npm link <path to ngx-login-client>/dist-watch`.
+This will create a symlink from `node_modules/ngx-login-client` to the `dist-watch` directory
+and install that symlinked node module into your webapp.
+3. Run your webapp in development mode, making sure you have a watch on `node_modules/ngx-login-client`
+enabled. To do this using a typical Angular Webpack setup, such as the one based on Angular Class,
+just run `npm start. You will have access to both JS sourcemaps and SASS sourcemaps if your webapp
+is properly setup.
+
+Note that `fabric8-ui` is setup to do reloading and sourcemaps automatically when you
+run `npm start`.
 
 
 ## Continuous Delivery & Semantic Relases
