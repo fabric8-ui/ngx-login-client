@@ -7,5 +7,5 @@ export class User implements Entity {
   type: string;
   links?: {
     self: string;
-  }
+  };
 }

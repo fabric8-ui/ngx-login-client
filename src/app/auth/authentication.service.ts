@@ -36,7 +36,7 @@ export class AuthenticationService {
   isLoggedIn(): boolean {
     let token = localStorage.getItem('auth_token');
     if (token) {
-      if(!this.clearTimeoutId) {
+      if (!this.clearTimeoutId) {
         this.setupRefreshTimer(15);
       }
       return true;
@@ -64,7 +64,7 @@ export class AuthenticationService {
       let headers = new Headers({'Content-Type': 'application/json'});
       let refreshTokenUrl = this.apiUrl + 'login/refresh';
       let refreshToken = localStorage.getItem('refresh_token');
-      let body = JSON.stringify({"refresh_token": refreshToken});
+      let body = JSON.stringify({'refresh_token': refreshToken});
       this.http.post(refreshTokenUrl, body, headers)
         .map((response: Response) => {
           let responseJson = response.json();
@@ -77,7 +77,7 @@ export class AuthenticationService {
     }
   }
 
-  processTokenResponse(response: any): Token {
+  processTokenResponse( response: any ): Token {
     let token = response as Token;
     localStorage.setItem('auth_token', token.access_token);
     localStorage.setItem('refresh_token', token.refresh_token);

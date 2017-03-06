@@ -1,5 +1,14 @@
 import { Injectable, Inject, forwardRef } from '@angular/core';
-import { Http, XHRBackend, RequestOptions, Request, RequestOptionsArgs, Response, Headers } from '@angular/http';
+import {
+  Headers,
+  Http,
+  Response,
+  RequestOptions,
+  Request,
+  RequestOptionsArgs,
+  XHRBackend
+} from '@angular/http';
+
 import { Observable} from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
@@ -39,7 +48,7 @@ export class HttpService extends Http {
     return (res: Response) => {
       if (res.status === 401 || res.status === 403) {
         this.broadcaster.broadcast('authenticationError', res);
-      } else if(res.status === 500) {
+      } else if (res.status === 500) {
         this.broadcaster.broadcast('communicationError', res);
       }
       return Observable.throw(res);
