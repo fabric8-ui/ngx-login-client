@@ -36,6 +36,9 @@ export class AuthenticationService {
   isLoggedIn(): boolean {
     let token = localStorage.getItem('auth_token');
     if (token) {
+      if(!this.clearTimeoutId) {
+        this.setupRefreshTimer(15);
+      }
       return true;
     }
     return false;
@@ -58,9 +61,7 @@ export class AuthenticationService {
 
   refreshToken() {
     if (this.isLoggedIn()) {
-      this.clearTimeoutId = null;
       let headers = new Headers({'Content-Type': 'application/json'});
-      headers.set('Authorization', 'Bearer ' + this.getToken());
       let refreshTokenUrl = this.apiUrl + 'login/refresh';
       let refreshToken = localStorage.getItem('refresh_token');
       let body = JSON.stringify({"refresh_token": refreshToken});
@@ -68,6 +69,7 @@ export class AuthenticationService {
         .map((response: Response) => {
           let responseJson = response.json();
           let token = this.processTokenResponse(responseJson.token);
+          this.clearTimeoutId = null;
           this.setupRefreshTimer(token.expires_in);
         }).subscribe( () => {
           console.log('token refreshed at:' + Date.now());

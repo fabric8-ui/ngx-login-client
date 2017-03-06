@@ -27,7 +27,6 @@ export class UserService {
               private auth: AuthenticationService,
               private broadcaster: Broadcaster,
               @Inject(AUTH_API_URL) apiUrl: string
-              //private profile: ProfileService
   ) {
     this.userUrl = apiUrl + 'user';
     this.usersUrl = apiUrl + 'users';
@@ -54,7 +53,6 @@ export class UserService {
         resolve(this.userData);
       });
     } else {
-      this.headers.set('Authorization', 'Bearer ' + this.auth.getToken());
       return this.http
         .get(this.userUrl, {headers: this.headers})
         .toPromise()
@@ -75,13 +73,7 @@ export class UserService {
           this.broadcaster.broadcast('currentUserInit', this.userData);
           return this.userData;
         })
-        .catch ((e) => {
-          if (e.status === 401) {
-            this.auth.logout();
-          } else {
-            this.handleError(e);
-          }
-        });
+        .catch(() => {});
     }
   }
 
@@ -98,17 +90,11 @@ export class UserService {
           this.allUserData = response.json().data as User[];
           return this.allUserData;
         })
-        .catch(this.handleError);
+        .catch(() => {});
     }
   }
 
   resetUser(): void {
     this.userData = {} as User;
   }
-
-  private handleError(error: any): Promise<any> {
-    console.error('An error occurred', error);
-    return Promise.reject(error.message || error);
-  }
-
 }
