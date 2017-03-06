@@ -1,5 +1,8 @@
 # @AngularClass
 
+# compiled output
+/dist
+/dist-watch
 # Logs
 logs
 *.log
