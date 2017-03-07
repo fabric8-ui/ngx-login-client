@@ -61,7 +61,7 @@ export class UserService {
     // We need the auth key to get the user data. So either we already the data or we don't have the keys
     //   in either case don't try to get the data.
     if (Object.keys(this.userData).length || !this.auth.isLoggedIn()) {
-      return Observable.create(this.userData);
+      return Observable.of(this.userData);
     } else {
       return this.http
         .get(this.userUrl, {headers: this.headers})
@@ -91,7 +91,7 @@ export class UserService {
    */
   getAllUsers(): Observable<User[]> {
     if (this.allUserData.length) {
-      return Observable.create(this.allUserData);
+      return Observable.of(this.allUserData);
     } else {
       return this.http
         .get(this.usersUrl, {headers: this.headers})
