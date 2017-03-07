@@ -1,6 +1,7 @@
 # ngx-login-client
 
 [![Build Status](https://ci.centos.org/buildStatus/icon?job=devtools-ngx-login-client-npm-publish-build-master)](https://ci.centos.org/view/Devtools/job/devtools-ngx-login-client-npm-publish-build-master/)
+[![npm version](https://badge.fury.io/js/ngx-login-client.svg)](https://badge.fury.io/js/ngx-login-client) 
 
 Auth and User services for Angular v2 and up
 
