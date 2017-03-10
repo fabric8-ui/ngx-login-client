@@ -47,9 +47,7 @@ export class UserService {
       .subscribe(message => {
         this.resetUser();
       });
-    // TODO Remove these when we remove deprecated methods
-    this.loggedInUser.subscribe(val => this.userData = val);
-    this.getAllUsers().subscribe(val => this.allUserData = val);
+
   }
 
   /**
@@ -62,7 +60,9 @@ export class UserService {
         let userData = cloneDeep(response.json().data as User);
         userData.attributes.primaryEmail = userData.attributes.email;
         return userData;
-      });
+      })
+      // TODO remove this
+      .do(val => this.userData = val);
   }
 
   /**
@@ -132,7 +132,9 @@ export class UserService {
       .map(response => {
         this.allUserData = response.json().data as User[];
         return this.allUserData;
-      });
+      })
+      // TODO remove this
+      .do(val => this.allUserData = val);
   }
 
   /**
