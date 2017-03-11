@@ -12,8 +12,8 @@ export class AuthenticationService {
   private clearTimeoutId: any;
 
   constructor(private broadcaster: Broadcaster,
-              @Inject(AUTH_API_URL) apiUrl: string,
-              private http: Http) {
+    @Inject(AUTH_API_URL) apiUrl: string,
+    private http: Http) {
     this.apiUrl = apiUrl;
   }
 
@@ -21,8 +21,12 @@ export class AuthenticationService {
     let tokenJson = decodeURIComponent(tokenParameter);
     let token = this.processTokenResponse(JSON.parse(tokenJson));
     this.setupRefreshTimer(token.expires_in);
-    this.broadcaster.broadcast('loggedin', 1);
+    this.onLogIn();
     return true;
+  }
+
+  onLogIn() {
+    this.broadcaster.broadcast('loggedin', 1);
   }
 
   logout() {

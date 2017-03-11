@@ -1,13 +1,9 @@
 import { Injectable, Inject } from '@angular/core';
 import { Headers, Http } from '@angular/http';
-import { Observable } from 'rxjs';
+import { Observable, ConnectableObservable, ReplaySubject, Subject } from 'rxjs';
 
-import 'rxjs/add/operator/toPromise';
-import 'rxjs/add/operator/catch';
 import { cloneDeep } from 'lodash';
 
-import { Broadcaster } from '../shared/broadcaster.service';
-import { AuthenticationService } from '../auth/authentication.service';
 import { Logger } from '../shared/logger.service';
 import { AUTH_API_URL } from '../shared/auth-api';
 import { User } from './user';
@@ -20,6 +16,11 @@ import { User } from './user';
  */
 @Injectable()
 export class UserService {
+
+  /**
+   * The currently logged in user
+   */
+  public loggedInUser: ConnectableObservable<User>;
 
   /**
    * @deprecated since v0.4.4. Use {@link #loggedInUser} instead.
@@ -37,32 +38,36 @@ export class UserService {
 
   constructor(private http: Http,
     private logger: Logger,
-    private auth: AuthenticationService,
-    private broadcaster: Broadcaster,
+    broadcaster: Broadcaster,
     @Inject(AUTH_API_URL) apiUrl: string
   ) {
     this.userUrl = apiUrl + 'user';
     this.usersUrl = apiUrl + 'users';
-    this.broadcaster.on<string>('logout')
-      .subscribe(message => {
-        this.resetUser();
-      });
-
-  }
-
-  /**
-   * The currently logged in user
-   */
-  get loggedInUser(): Observable<User> {
-    return this.http
-      .get(this.userUrl, { headers: this.headers })
-      .map(response => {
-        let userData = cloneDeep(response.json().data as User);
-        userData.attributes.primaryEmail = userData.attributes.email;
-        return userData;
+    this.loggedInUser = Observable.merge(
+      broadcaster.on('loggedin')
+        .map(val => 'loggedIn'),
+      broadcaster.on('logout')
+        .map(val => 'loggedOut'),
+      broadcaster.on('authenticationError')
+        .map(val => 'authenticationError')
+    )
+      .switchMap(val => {
+        // If it's a login event, then we need to retreive the user's details
+        if (val === 'loggedIn') {
+          return this.http
+            .get(this.userUrl, { headers: this.headers })
+            .map(response => cloneDeep(response.json().data as User));
+        } else {
+          // Otherwise, we clear the user
+          return Observable.of({} as User);
+        }
       })
       // TODO remove this
-      .do(val => this.userData = val);
+      .do(user => this.userData = user)
+      // In order to ensure any future subscribers get the currently user
+      // we use a replay subject of size 1
+      .multicast(() => new ReplaySubject(1));
+      this.loggedInUser.connect();
   }
 
   /**
