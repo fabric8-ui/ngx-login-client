@@ -76,14 +76,11 @@ export class UserService {
    * @param userId the userId to search for
    */
   getUserByUserId(userId: string): Observable<User> {
-    return this.getAllUsers().map(val => {
-      for (let u of val) {
-        if (userId === u.id) {
-          return u;
-        }
-      }
-      return null;
-    });
+    return this.http
+      .get(`${this.usersUrl}/${userId}`, { headers: this.headers })
+      .map(response => {
+        return response.json().data as User;
+      });
   }
 
   /**
@@ -136,8 +133,7 @@ export class UserService {
     return this.http
       .get(this.usersUrl, { headers: this.headers })
       .map(response => {
-        this.allUserData = response.json().data as User[];
-        return this.allUserData;
+        return response.json().data as User[];
       })
       // TODO remove this
       .do(val => this.allUserData = val);
