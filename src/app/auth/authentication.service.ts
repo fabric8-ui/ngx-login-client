@@ -1,26 +1,36 @@
 import { Injectable, Inject } from '@angular/core';
-import { Http, Response, Headers } from '@angular/http';
+import { Http, Response, Headers, RequestOptions } from '@angular/http';
 
 import { Broadcaster } from '../shared/broadcaster.service';
 import { Token } from '../user/token';
 import { AUTH_API_URL } from '../shared/auth-api';
+import { Observable } from 'rxjs';
+import { SSO_API_URL } from '../shared/sso-api';
 
 @Injectable()
 export class AuthenticationService {
   private refreshInterval: number;
   private apiUrl: string;
+  private ssoUrl: string;
   private clearTimeoutId: any;
+  private clearOpenShiftTimeoutId: any;
 
   constructor(private broadcaster: Broadcaster,
     @Inject(AUTH_API_URL) apiUrl: string,
+    @Inject(SSO_API_URL) ssoUrl: string,
     private http: Http) {
     this.apiUrl = apiUrl;
+    this.ssoUrl = ssoUrl;
   }
 
   logIn(tokenParameter: string): boolean {
     let tokenJson = decodeURIComponent(tokenParameter);
     let token = this.processTokenResponse(JSON.parse(tokenJson));
     this.setupRefreshTimer(token.expires_in);
+
+    // make sure old openshift token is cleared out when we login again
+    localStorage.removeItem('openshift_token');
+
     this.onLogIn();
     return true;
   }
@@ -32,6 +42,7 @@ export class AuthenticationService {
   logout() {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('openshift_token');
     clearTimeout(this.clearTimeoutId);
     this.refreshInterval = null;
     this.broadcaster.broadcast('logout', 1);
@@ -50,6 +61,38 @@ export class AuthenticationService {
 
   getToken() {
     if (this.isLoggedIn()) return localStorage.getItem('auth_token');
+  }
+
+  getOpenShiftToken(): Observable<string> {
+    if (localStorage.getItem('openshift_token')) {
+      return Observable.of(localStorage.getItem('openshift_token'));
+    } else {
+      if (this.isLoggedIn()) {
+        let headers = new Headers({'Content-Type': 'application/json'});
+        let osTokenUrl = this.ssoUrl + 'auth/realms/fabric8/broker/openshift-v3/token';
+        let token = this.getToken();
+        headers.set('Authorization', `Bearer ${token}`);
+        let options = new RequestOptions({ headers: headers });
+        return this.http.get(osTokenUrl, options)
+          .map((response: Response) => {
+            let token = response.json() as Token;
+            this.clearOpenShiftTimeoutId = null;
+            localStorage.setItem('openshift_token', token.access_token);
+
+            let refreshInMs = Math.round(token.expires_in * .9) * 1000;
+            console.log('Clearing openshift token in: ' + refreshInMs + ' milliseconds.');
+            setTimeout(() => this.clearOpenShiftToken(), refreshInMs);
+            return token.access_token;
+          });
+      } else {
+        // user is not logged in, return empty
+        return Observable.of('');
+      }
+    }
+  }
+
+  clearOpenShiftToken() {
+    localStorage.removeItem('openshift_token');
   }
 
   setupRefreshTimer(refreshInSeconds: number) {
