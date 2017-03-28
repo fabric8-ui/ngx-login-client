@@ -1,5 +1,6 @@
-import { User } from './user';
 import { Pipe, PipeTransform } from '@angular/core';
+
+import { User } from './user';
 
 // tslint:disable-next-line:use-pipe-transform-interface
 @Pipe({ name: 'almUserName', pure: true })

@@ -1,10 +1,15 @@
 import { Injectable, Inject } from '@angular/core';
 import { Headers, Http } from '@angular/http';
-import { Observable, ConnectableObservable, ReplaySubject, Subject } from 'rxjs';
+
+import {
+  Observable,
+  ConnectableObservable,
+  ReplaySubject,
+  Subject
+} from 'rxjs';
 
 import { cloneDeep } from 'lodash';
-import { Broadcaster } from 'ngx-base';
-import { Logger } from 'ngx-base';
+import { Broadcaster, Logger } from 'ngx-base';
 
 import { AUTH_API_URL } from '../shared/auth-api';
 import { User } from './user';

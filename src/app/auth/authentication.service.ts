@@ -1,12 +1,12 @@
 import { Injectable, Inject } from '@angular/core';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 
+import { Observable } from 'rxjs';
 import { Broadcaster } from 'ngx-base';
 
-import { Token } from '../user/token';
 import { AUTH_API_URL } from '../shared/auth-api';
-import { Observable } from 'rxjs';
 import { SSO_API_URL } from '../shared/sso-api';
+import { Token } from '../user/token';
 
 @Injectable()
 export class AuthenticationService {
