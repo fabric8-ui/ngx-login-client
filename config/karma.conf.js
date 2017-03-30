@@ -26,7 +26,6 @@ module.exports = function(config) {
      * we are building the test environment in ./spec-bundle.js
      */
     files: [
-      { pattern: './src/assets/img/*', watched: false, included: false, served: true },
       { pattern: './config/spec-bundle.js', watched: false }
     ],
 
@@ -102,7 +101,7 @@ module.exports = function(config) {
           },
         },
         flags: ['--load-images=true'],
-        debug: true
+        debug: false
       }
     },
     phantomjsLauncher: {
