@@ -1,27 +1,38 @@
 import { Injectable, Inject } from '@angular/core';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { Broadcaster } from 'ngx-base';
 
 import { AUTH_API_URL } from '../shared/auth-api';
 import { SSO_API_URL } from '../shared/sso-api';
 import { Token } from '../user/token';
 
+export interface ProcessTokenResponse {
+  (response: Response): Token;
+}
+
 @Injectable()
 export class AuthenticationService {
+
+  public openShiftToken: Observable<string>;
+  public gitHubToken: Observable<string>;
   private refreshInterval: number;
   private apiUrl: string;
   private ssoUrl: string;
   private clearTimeoutId: any;
-  private clearOpenShiftTimeoutId: any;
+  private refreshTokens: Subject<Token> = new Subject();
 
-  constructor(private broadcaster: Broadcaster,
+  constructor(
+    private broadcaster: Broadcaster,
     @Inject(AUTH_API_URL) apiUrl: string,
     @Inject(SSO_API_URL) ssoUrl: string,
-    private http: Http) {
+    private http: Http
+  ) {
     this.apiUrl = apiUrl;
     this.ssoUrl = ssoUrl;
+    this.openShiftToken = this.createFederatedToken('openshift-v3', (response: Response) => response.json() as Token);
+    this.gitHubToken = this.createFederatedToken('github', (response: Response) => this.queryAsToken(response.text()));
   }
 
   logIn(tokenParameter: string): boolean {
@@ -65,35 +76,7 @@ export class AuthenticationService {
   }
 
   getOpenShiftToken(): Observable<string> {
-    if (localStorage.getItem('openshift_token')) {
-      return Observable.of(localStorage.getItem('openshift_token'));
-    } else {
-      if (this.isLoggedIn()) {
-        let headers = new Headers({'Content-Type': 'application/json'});
-        let osTokenUrl = this.ssoUrl + 'auth/realms/fabric8/broker/openshift-v3/token';
-        let token = this.getToken();
-        headers.set('Authorization', `Bearer ${token}`);
-        let options = new RequestOptions({ headers: headers });
-        return this.http.get(osTokenUrl, options)
-          .map((response: Response) => {
-            let token = response.json() as Token;
-            this.clearOpenShiftTimeoutId = null;
-            localStorage.setItem('openshift_token', token.access_token);
-
-            let refreshInMs = Math.round(token.expires_in * .9) * 1000;
-            console.log('Clearing openshift token in: ' + refreshInMs + ' milliseconds.');
-            setTimeout(() => this.clearOpenShiftToken(), refreshInMs);
-            return token.access_token;
-          });
-      } else {
-        // user is not logged in, return empty
-        return Observable.of('');
-      }
-    }
-  }
-
-  clearOpenShiftToken() {
-    localStorage.removeItem('openshift_token');
+    return this.openShiftToken;
   }
 
   setupRefreshTimer(refreshInSeconds: number) {
@@ -109,26 +92,56 @@ export class AuthenticationService {
 
   refreshToken() {
     if (this.isLoggedIn()) {
-      let headers = new Headers({'Content-Type': 'application/json'});
+      let headers = new Headers({ 'Content-Type': 'application/json' });
       let refreshTokenUrl = this.apiUrl + 'login/refresh';
       let refreshToken = localStorage.getItem('refresh_token');
-      let body = JSON.stringify({'refresh_token': refreshToken});
+      let body = JSON.stringify({ 'refresh_token': refreshToken });
       this.http.post(refreshTokenUrl, body, headers)
         .map((response: Response) => {
           let responseJson = response.json();
           let token = this.processTokenResponse(responseJson.token);
           this.clearTimeoutId = null;
           this.setupRefreshTimer(token.expires_in);
-        }).subscribe( () => {
+          return token;
+        }).subscribe(token => {
+          // Refresh any federated tokens that we have
+          this.refreshTokens.next(token);
           console.log('token refreshed at:' + Date.now());
         });
     }
   }
 
-  processTokenResponse( response: any ): Token {
+  processTokenResponse(response: any): Token {
     let token = response as Token;
     localStorage.setItem('auth_token', token.access_token);
     localStorage.setItem('refresh_token', token.refresh_token);
     return token;
+  }
+
+  private createFederatedToken(broker: string, processToken: ProcessTokenResponse): Observable<string> {
+    let res = this.refreshTokens.switchMap(token => {
+      let headers = new Headers({ 'Content-Type': 'application/json' });
+      let tokenUrl = this.ssoUrl + `auth/realms/fabric8/broker/${broker}/token`;
+      headers.set('Authorization', `Bearer ${token.access_token}`);
+      let options = new RequestOptions({ headers: headers });
+      return this.http.get(tokenUrl, options)
+        .map(response => processToken(response))
+        .map(t => t.access_token);
+    })
+    .publishReplay(1);
+    res.connect();
+    return res;
+  }
+
+  private queryAsToken(query: string): Token {
+    let vars = query.split('&');
+    let token = {} as any;
+    for (let i = 0; i < vars.length; i++) {
+      let pair = vars[i].split('=');
+      let key = decodeURIComponent(pair[0]);
+      let val = decodeURIComponent(pair[1]);
+      token[key] = val;
+    }
+    return token as Token;
   }
 }
