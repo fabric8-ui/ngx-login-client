@@ -40,6 +40,9 @@ export class AuthenticationService {
     let token = this.processTokenResponse(JSON.parse(tokenJson));
     this.setupRefreshTimer(token.expires_in);
 
+    // kick off initial token refresh
+    this.refreshTokens.next(token);
+
     // make sure old openshift token is cleared out when we login again
     localStorage.removeItem('openshift_token');
 
@@ -52,12 +55,16 @@ export class AuthenticationService {
   }
 
   logout() {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('openshift_token');
-    clearTimeout(this.clearTimeoutId);
-    this.refreshInterval = null;
-    this.broadcaster.broadcast('logout', 1);
+    let logOutUrl = this.apiUrl + 'logout';
+    this.http.get(logOutUrl).subscribe(() => {
+      console.log('user logged out');
+      this.clearSessionData();
+      this.broadcaster.broadcast('logout', 1);
+    }, error => {
+      console.log('user failed to log out, clearing session data', error);
+      this.clearSessionData();
+      this.broadcaster.broadcast('logout', 1);
+    });
   }
 
   isLoggedIn(): boolean {
@@ -81,6 +88,11 @@ export class AuthenticationService {
 
   setupRefreshTimer(refreshInSeconds: number) {
     if (!this.clearTimeoutId) {
+      // refresh should be required to be less than ten minutes measured in seconds
+      let tenMinutes = 60 * 10;
+      if (refreshInSeconds > tenMinutes) {
+        refreshInSeconds = tenMinutes;
+      }
       let refreshInMs = Math.round(refreshInSeconds * .9) * 1000;
       console.log('Refreshing token in: ' + refreshInMs + ' milliseconds.');
       this.refreshInterval = refreshInMs;
@@ -143,5 +155,13 @@ export class AuthenticationService {
       token[key] = val;
     }
     return token as Token;
+  }
+
+  private clearSessionData(): void {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('openshift_token');
+    clearTimeout(this.clearTimeoutId);
+    this.refreshInterval = null;
   }
 }
