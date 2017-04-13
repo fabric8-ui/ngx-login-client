@@ -22,6 +22,8 @@ export class AuthenticationService {
   private ssoUrl: string;
   private clearTimeoutId: any;
   private refreshTokens: Subject<Token> = new Subject();
+  readonly openshift = 'openshift-v3';
+  readonly github = 'github';
 
   constructor(
     private broadcaster: Broadcaster,
@@ -31,8 +33,8 @@ export class AuthenticationService {
   ) {
     this.apiUrl = apiUrl;
     this.ssoUrl = ssoUrl;
-    this.openShiftToken = this.createFederatedToken('openshift-v3', (response: Response) => response.json() as Token);
-    this.gitHubToken = this.createFederatedToken('github', (response: Response) => this.queryAsToken(response.text()));
+    this.openShiftToken = this.createFederatedToken(this.openshift, (response: Response) => response.json() as Token);
+    this.gitHubToken = this.createFederatedToken(this.github, (response: Response) => this.queryAsToken(response.text()));
   }
 
   logIn(tokenParameter: string): boolean {
@@ -40,11 +42,12 @@ export class AuthenticationService {
     let token = this.processTokenResponse(JSON.parse(tokenJson));
     this.setupRefreshTimer(token.expires_in);
 
+    // make sure old tokens are cleared out when we login again
+    localStorage.removeItem(this.openshift + '_token');
+    localStorage.removeItem(this.github + '_token');
+
     // kick off initial token refresh
     this.refreshTokens.next(token);
-
-    // make sure old openshift token is cleared out when we login again
-    localStorage.removeItem('openshift_token');
 
     this.onLogIn();
     return true;
@@ -71,6 +74,8 @@ export class AuthenticationService {
     let token = localStorage.getItem('auth_token');
     if (token) {
       if (!this.clearTimeoutId) {
+        // kick off initial token refresh
+        this.refreshTokens.next({} as Token);
         this.setupRefreshTimer(15);
       }
       return true;
@@ -83,6 +88,9 @@ export class AuthenticationService {
   }
 
   getOpenShiftToken(): Observable<string> {
+    if (localStorage.getItem(this.openshift + '_token')) {
+      return Observable.of(localStorage.getItem(this.openshift + '_token'));
+    }
     return this.openShiftToken;
   }
 
@@ -138,6 +146,7 @@ export class AuthenticationService {
       let options = new RequestOptions({ headers: headers });
       return this.http.get(tokenUrl, options)
         .map(response => processToken(response))
+        .do(token => localStorage.setItem(broker + '_token', token.access_token))
         .map(t => t.access_token);
     })
     .publishReplay(1);
@@ -160,7 +169,8 @@ export class AuthenticationService {
   private clearSessionData(): void {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('refresh_token');
-    localStorage.removeItem('openshift_token');
+    localStorage.removeItem(this.openshift + '_token');
+    localStorage.removeItem(this.github + '_token');
     clearTimeout(this.clearTimeoutId);
     this.refreshInterval = null;
   }
