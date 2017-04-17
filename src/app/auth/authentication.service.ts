@@ -58,16 +58,8 @@ export class AuthenticationService {
   }
 
   logout() {
-    let logOutUrl = this.apiUrl + 'logout';
-    this.http.get(logOutUrl).subscribe(() => {
-      console.log('user logged out');
-      this.clearSessionData();
-      this.broadcaster.broadcast('logout', 1);
-    }, error => {
-      console.log('user failed to log out, clearing session data', error);
-      this.clearSessionData();
-      this.broadcaster.broadcast('logout', 1);
-    });
+    this.clearSessionData();
+    this.broadcaster.broadcast('logout', 1);
   }
 
   isLoggedIn(): boolean {
