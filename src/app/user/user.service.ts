@@ -93,7 +93,7 @@ export class UserService {
    * @param username the username to search for
    */
   getUserByUsername(username: string): Observable<User> {
-    return this.getAllUsers().map(val => {
+    return this.filterUsersByUsername(username).map(val => {
       for (let u of val) {
         if (username === u.attributes.username) {
           return u;
@@ -142,6 +142,21 @@ export class UserService {
       })
       // TODO remove this
       .do(val => this.allUserData = val);
+  }
+
+  /**
+   * 
+   * Filter users by username
+   * 
+   * @returns Observable<User[]>
+   */
+
+  filterUsersByUsername(username: string): Observable<User[]> {
+    return this.http
+      .get( `${this.usersUrl}?filter[username]=${username}`, { headers: this.headers })
+      .map(response => {
+        return response.json().data as User[];
+      })
   }
 
   /**
