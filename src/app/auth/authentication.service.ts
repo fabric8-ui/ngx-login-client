@@ -97,6 +97,9 @@ export class AuthenticationService {
       console.log('Refreshing token in: ' + refreshInMs + ' milliseconds.');
       this.refreshInterval = refreshInMs;
       if (process.env.ENV !== 'inmemory') {
+        // setTimeout() uses a 32 bit int to store the delay. So the max value allowed is 2147483647
+        // The bigger number will cause immediate refreshing
+        // but since we refresh in 10 minutes or in refreshInSeconds whatever is sooner we are good
         this.clearTimeoutId = setTimeout(() => this.refreshToken(), refreshInMs);
       }
     }
