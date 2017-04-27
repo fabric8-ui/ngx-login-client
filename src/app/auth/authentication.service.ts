@@ -141,6 +141,9 @@ export class AuthenticationService {
       let options = new RequestOptions({ headers: headers });
       return this.http.get(tokenUrl, options)
         .map(response => processToken(response))
+        .catch(error => {
+          return Observable.of({} as Token);
+        })
         .do(token => localStorage.setItem(broker + '_token', token.access_token))
         .map(t => t.access_token);
     })
