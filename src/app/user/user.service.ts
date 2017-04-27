@@ -41,6 +41,7 @@ export class UserService {
   private headers = new Headers({ 'Content-Type': 'application/json' });
   private userUrl: string;  // URL to web api
   private usersUrl: string;  // URL to web api
+  private searchUrl: string;
 
   constructor(private http: Http,
     private logger: Logger,
@@ -49,6 +50,7 @@ export class UserService {
   ) {
     this.userUrl = apiUrl + 'user';
     this.usersUrl = apiUrl + 'users';
+    this.searchUrl = apiUrl + 'search';
     this.loggedInUser = Observable.merge(
       broadcaster.on('loggedin')
         .map(val => 'loggedIn'),
@@ -103,6 +105,16 @@ export class UserService {
     });
   }
 
+  /**
+   * Get users by a search string
+   */
+  getUsersBySearchString(search: string): Observable<User[]> {
+    return this.http
+      .get(this.searchUrl + '/users?q=' + search, { headers: this.headers })
+      .map(response => {
+        return response.json().data as User[];
+      });
+  }
 
   /**
    * @deprecated since v0.4.4. Use {@link #loggedInUser} instead.
