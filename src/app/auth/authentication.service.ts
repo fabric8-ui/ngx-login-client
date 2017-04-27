@@ -67,7 +67,7 @@ export class AuthenticationService {
     if (token) {
       if (!this.clearTimeoutId) {
         // kick off initial token refresh
-        this.refreshTokens.next({"access_token": token} as Token);
+        this.refreshTokens.next({ "access_token": token } as Token);
         this.setupRefreshTimer(15);
       }
       return true;
@@ -118,7 +118,15 @@ export class AuthenticationService {
           this.clearTimeoutId = null;
           this.setupRefreshTimer(token.expires_in);
           return token;
-        }).subscribe(token => {
+        })
+        .catch(response => {
+          // Additionally catch a 400 from keycloak
+          if (response.status === 400) {
+            this.broadcaster.broadcast('authenticationError', response);
+          }
+          return Observable.of({} as Token);
+        })
+        .subscribe(token => {
           // Refresh any federated tokens that we have
           this.refreshTokens.next(token);
           console.log('token refreshed at:' + Date.now());
@@ -141,13 +149,16 @@ export class AuthenticationService {
       let options = new RequestOptions({ headers: headers });
       return this.http.get(tokenUrl, options)
         .map(response => processToken(response))
-        .catch(error => {
+        .catch(response => {
+          if (response.status === 400) {
+            this.broadcaster.broadcast('authenticationError', res);
+          }
           return Observable.of({} as Token);
         })
         .do(token => localStorage.setItem(broker + '_token', token.access_token))
         .map(t => t.access_token);
     })
-    .publishReplay(1);
+      .publishReplay(1);
     res.connect();
     return res;
   }
