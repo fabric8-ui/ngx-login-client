@@ -109,11 +109,14 @@ export class UserService {
    * Get users by a search string
    */
   getUsersBySearchString(search: string): Observable<User[]> {
-    return this.http
-      .get(this.searchUrl + '/users?q=' + search, { headers: this.headers })
-      .map(response => {
-        return response.json().data as User[];
-      });
+    if (search && search !== "") {
+      return this.http
+        .get(this.searchUrl + '/users?q=' + search, {headers: this.headers})
+        .map(response => {
+          return response.json().data as User[];
+        });
+    }
+    return Observable.of([] as User[]);
   }
 
   /**
