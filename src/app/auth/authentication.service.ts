@@ -151,7 +151,7 @@ export class AuthenticationService {
         .map(response => processToken(response))
         .catch(response => {
           if (response.status === 400) {
-            this.broadcaster.broadcast('authenticationError', res);
+            this.broadcaster.broadcast('noFederatedToken', res);
           }
           return Observable.of({} as Token);
         })
