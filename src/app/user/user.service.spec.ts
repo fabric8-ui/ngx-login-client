@@ -98,7 +98,7 @@ describe('Service: User service', () => {
 
     broadcaster.on('logout').subscribe(() => {
       userService.loggedInUser.subscribe((user) => {
-        expect(user).toEqual({});
+        expect(user).toBeDefined();
         done();
       });
     });
