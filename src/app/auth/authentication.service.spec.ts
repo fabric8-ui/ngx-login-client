@@ -1,5 +1,5 @@
 
-import { inject, TestBed } from '@angular/core/testing';
+import { async, inject, TestBed } from '@angular/core/testing';
 import { BaseRequestOptions, Http, Response, ResponseOptions } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
 
@@ -50,7 +50,6 @@ describe('Service: Authentication service', () => {
   ));
 
   afterEach(() => {
-    authenticationService.clearOpenShiftToken();
     authenticationService.logout();
   });
 
@@ -125,6 +124,7 @@ describe('Service: Authentication service', () => {
   });
 
   it('Openshift token processing', (done) => {
+    // given
     mockService.connections.subscribe((connection: any) => {
       connection.mockRespond(new Response(
         new ResponseOptions({
@@ -138,22 +138,32 @@ describe('Service: Authentication service', () => {
     broadcaster.on('loggedin').subscribe((data: number) => {
       let token = JSON.parse(tokenJson);
       authenticationService.getOpenShiftToken().subscribe(output => {
+        // then
         expect(output == token.access_token);
-        expect(localStorage.getItem('openshift_token')).toBe(token.access_token);
-        authenticationService.clearOpenShiftToken();
+        expect(localStorage.getItem('openshift-v3_token')).toBe(token.access_token);
+        authenticationService.logout();
         done();
       });
     });
 
+    // when
     authenticationService.logIn(tokenJson);
   });
-  //
 
-  it('Openshift token processing - not logged in', (done) => {
+  it('Openshift token processing - not logged in', async(() => {
+      mockService.connections.subscribe((connection: any) => {
+      connection.mockRespond(new Response(
+        new ResponseOptions({
+          body: tokenJson,
+          status: 200
+        })
+      ));
+    });
+    spyOn(authenticationService, 'setupRefreshTimer');
+
     authenticationService.getOpenShiftToken().subscribe(output => {
       expect(output == '');
-      expect(localStorage.getItem('openshift_token')).toBeNull();
-      done();
+      expect(localStorage.getItem('openshift-v3_token')).toBeNull();
     });
-  });
+  }));
 });
