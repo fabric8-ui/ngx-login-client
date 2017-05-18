@@ -8,6 +8,7 @@ import { Broadcaster } from 'ngx-base';
 import { SSO_API_URL } from '../shared/sso-api';
 import { AuthenticationService } from './authentication.service';
 import { AUTH_API_URL } from '../shared/auth-api';
+import { REALM } from '../shared/realm-token';
 
 describe('Service: Authentication service', () => {
 
@@ -30,6 +31,10 @@ describe('Service: Authentication service', () => {
         {
           provide: AUTH_API_URL,
           useValue: "http://example.com"
+        },
+        {
+          provide: REALM,
+          useValue: "fabric8"
         },
         {
           provide: SSO_API_URL,

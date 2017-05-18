@@ -6,6 +6,7 @@ import { Broadcaster } from 'ngx-base';
 
 import { AUTH_API_URL } from '../shared/auth-api';
 import { SSO_API_URL } from '../shared/sso-api';
+import { REALM } from '../shared/realm-token';
 import { Token } from '../user/token';
 
 export interface ProcessTokenResponse {
@@ -20,6 +21,7 @@ export class AuthenticationService {
   private refreshInterval: number;
   private apiUrl: string;
   private ssoUrl: string;
+  private realm: string;
   private clearTimeoutId: any;
   private refreshTokens: Subject<Token> = new Subject();
   readonly openshift = 'openshift-v3';
@@ -29,10 +31,12 @@ export class AuthenticationService {
     private broadcaster: Broadcaster,
     @Inject(AUTH_API_URL) apiUrl: string,
     @Inject(SSO_API_URL) ssoUrl: string,
+    @Inject(REALM) realm: string,
     private http: Http
   ) {
     this.apiUrl = apiUrl;
     this.ssoUrl = ssoUrl;
+    this.realm = realm;
     this.openShiftToken = this.createFederatedToken(this.openshift, (response: Response) => response.json() as Token);
     this.gitHubToken = this.createFederatedToken(this.github, (response: Response) => this.queryAsToken(response.text()));
   }
@@ -144,7 +148,7 @@ export class AuthenticationService {
   private createFederatedToken(broker: string, processToken: ProcessTokenResponse): Observable<string> {
     let res = this.refreshTokens.switchMap(token => {
       let headers = new Headers({ 'Content-Type': 'application/json' });
-      let tokenUrl = this.ssoUrl + `auth/realms/fabric8/broker/${broker}/token`;
+      let tokenUrl = this.ssoUrl + `auth/realms/${this.realm}/broker/${broker}/token`;
       headers.set('Authorization', `Bearer ${token.access_token}`);
       let options = new RequestOptions({ headers: headers });
       return this.http.get(tokenUrl, options)
