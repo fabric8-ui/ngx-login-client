@@ -1,11 +1,12 @@
 import { Injectable, Inject } from '@angular/core';
-import { Http, Response, Headers, RequestOptions } from '@angular/http';
+import { Http, Response, Headers, RequestOptions, RequestOptionsArgs } from '@angular/http';
 
 import { Observable, Subject } from 'rxjs';
 import { Broadcaster } from 'ngx-base';
 
 import { AUTH_API_URL } from '../shared/auth-api';
 import { SSO_API_URL } from '../shared/sso-api';
+import { REALM } from '../shared/realm-token';
 import { Token } from '../user/token';
 
 export interface ProcessTokenResponse {
@@ -20,6 +21,7 @@ export class AuthenticationService {
   private refreshInterval: number;
   private apiUrl: string;
   private ssoUrl: string;
+  private realm: string;
   private clearTimeoutId: any;
   private refreshTokens: Subject<Token> = new Subject();
   readonly openshift = 'openshift-v3';
@@ -29,10 +31,12 @@ export class AuthenticationService {
     private broadcaster: Broadcaster,
     @Inject(AUTH_API_URL) apiUrl: string,
     @Inject(SSO_API_URL) ssoUrl: string,
+    @Inject(REALM) realm: string,
     private http: Http
   ) {
     this.apiUrl = apiUrl;
     this.ssoUrl = ssoUrl;
+    this.realm = realm;
     this.openShiftToken = this.createFederatedToken(this.openshift, (response: Response) => response.json() as Token);
     this.gitHubToken = this.createFederatedToken(this.github, (response: Response) => this.queryAsToken(response.text()));
   }
@@ -67,7 +71,7 @@ export class AuthenticationService {
     if (token) {
       if (!this.clearTimeoutId) {
         // kick off initial token refresh
-        this.refreshTokens.next({"access_token": token} as Token);
+        this.refreshTokens.next({ "access_token": token } as Token);
         this.setupRefreshTimer(15);
       }
       return true;
@@ -97,6 +101,9 @@ export class AuthenticationService {
       console.log('Refreshing token in: ' + refreshInMs + ' milliseconds.');
       this.refreshInterval = refreshInMs;
       if (process.env.ENV !== 'inmemory') {
+        // setTimeout() uses a 32 bit int to store the delay. So the max value allowed is 2147483647
+        // The bigger number will cause immediate refreshing
+        // but since we refresh in 10 minutes or in refreshInSeconds whatever is sooner we are good
         this.clearTimeoutId = setTimeout(() => this.refreshToken(), refreshInMs);
       }
     }
@@ -105,17 +112,26 @@ export class AuthenticationService {
   refreshToken() {
     if (this.isLoggedIn()) {
       let headers = new Headers({ 'Content-Type': 'application/json' });
+      let options: RequestOptions = new RequestOptions({ headers: headers });
       let refreshTokenUrl = this.apiUrl + 'token/refresh';
       let refreshToken = localStorage.getItem('refresh_token');
       let body = JSON.stringify({ 'refresh_token': refreshToken });
-      this.http.post(refreshTokenUrl, body, headers)
+      this.http.post(refreshTokenUrl, body, options)
         .map((response: Response) => {
           let responseJson = response.json();
           let token = this.processTokenResponse(responseJson.token);
           this.clearTimeoutId = null;
           this.setupRefreshTimer(token.expires_in);
           return token;
-        }).subscribe(token => {
+        })
+        .catch(response => {
+          // Additionally catch a 400 from keycloak
+          if (response.status === 400) {
+            this.broadcaster.broadcast('authenticationError', response);
+          }
+          return Observable.of({} as Token);
+        })
+        .subscribe(token => {
           // Refresh any federated tokens that we have
           this.refreshTokens.next(token);
           console.log('token refreshed at:' + Date.now());
@@ -133,15 +149,21 @@ export class AuthenticationService {
   private createFederatedToken(broker: string, processToken: ProcessTokenResponse): Observable<string> {
     let res = this.refreshTokens.switchMap(token => {
       let headers = new Headers({ 'Content-Type': 'application/json' });
-      let tokenUrl = this.ssoUrl + `auth/realms/fabric8/broker/${broker}/token`;
+      let tokenUrl = this.ssoUrl + `auth/realms/${this.realm}/broker/${broker}/token`;
       headers.set('Authorization', `Bearer ${token.access_token}`);
       let options = new RequestOptions({ headers: headers });
       return this.http.get(tokenUrl, options)
         .map(response => processToken(response))
+        .catch(response => {
+          if (response.status === 400) {
+            this.broadcaster.broadcast('noFederatedToken', res);
+          }
+          return Observable.of({} as Token);
+        })
         .do(token => localStorage.setItem(broker + '_token', token.access_token))
         .map(t => t.access_token);
     })
-    .publishReplay(1);
+      .publishReplay(1);
     res.connect();
     return res;
   }

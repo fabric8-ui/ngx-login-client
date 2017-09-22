@@ -41,6 +41,7 @@ export class UserService {
   private headers = new Headers({ 'Content-Type': 'application/json' });
   private userUrl: string;  // URL to web api
   private usersUrl: string;  // URL to web api
+  private searchUrl: string;
 
   constructor(private http: Http,
     private logger: Logger,
@@ -49,6 +50,7 @@ export class UserService {
   ) {
     this.userUrl = apiUrl + 'user';
     this.usersUrl = apiUrl + 'users';
+    this.searchUrl = apiUrl + 'search';
     this.loggedInUser = Observable.merge(
       broadcaster.on('loggedin')
         .map(val => 'loggedIn'),
@@ -93,7 +95,7 @@ export class UserService {
    * @param username the username to search for
    */
   getUserByUsername(username: string): Observable<User> {
-    return this.getAllUsers().map(val => {
+    return this.filterUsersByUsername(username).map(val => {
       for (let u of val) {
         if (username === u.attributes.username) {
           return u;
@@ -103,6 +105,19 @@ export class UserService {
     });
   }
 
+  /**
+   * Get users by a search string
+   */
+  getUsersBySearchString(search: string): Observable<User[]> {
+    if (search && search !== "") {
+      return this.http
+        .get(this.searchUrl + '/users?q=' + search, {headers: this.headers})
+        .map(response => {
+          return response.json().data as User[];
+        });
+    }
+    return Observable.of([] as User[]);
+  }
 
   /**
    * @deprecated since v0.4.4. Use {@link #loggedInUser} instead.
@@ -142,6 +157,21 @@ export class UserService {
       })
       // TODO remove this
       .do(val => this.allUserData = val);
+  }
+
+  /**
+   * 
+   * Filter users by username
+   * 
+   * @returns Observable<User[]>
+   */
+
+  filterUsersByUsername(username: string): Observable<User[]> {
+    return this.http
+      .get( `${this.usersUrl}?filter[username]=${username}`, { headers: this.headers })
+      .map(response => {
+        return response.json().data as User[];
+      })
   }
 
   /**

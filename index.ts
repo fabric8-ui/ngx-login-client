@@ -1,5 +1,6 @@
 export { LoginModule } from './login.module';
 
+export { REALM } from './src/app/shared/realm-token';
 export { AUTH_API_URL } from './src/app/shared/auth-api';
 export { SSO_API_URL } from './src/app/shared/sso-api';
 export { AlmUserName } from './src/app/user/alm-user-name.pipe';
