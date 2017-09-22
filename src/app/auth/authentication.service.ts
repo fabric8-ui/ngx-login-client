@@ -105,7 +105,7 @@ export class AuthenticationService {
   refreshToken() {
     if (this.isLoggedIn()) {
       let headers = new Headers({ 'Content-Type': 'application/json' });
-      let refreshTokenUrl = this.apiUrl + 'login/refresh';
+      let refreshTokenUrl = this.apiUrl + 'token/refresh';
       let refreshToken = localStorage.getItem('refresh_token');
       let body = JSON.stringify({ 'refresh_token': refreshToken });
       this.http.post(refreshTokenUrl, body, headers)
