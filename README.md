@@ -1,6 +1,6 @@
 # ngx-login-client
 
-[![Build Status](https://ci.centos.org/buildStatus/icon?job=devtools-ngx-login-client-npm-publish-build-master)](https://ci.centos.org/view/Devtools/job/devtools-ngx-login-client-npm-publish-build-master/) 
+[![Build Status](https://ci.centos.org/buildStatus/icon?job=devtools-ngx-login-client-npm-publish-build-master)](https://ci.centos.org/view/Devtools/job/devtools-ngx-login-client-npm-publish-build-master/)  
 [![Build Status](https://jenkins.cd.test.fabric8.io/job/fabric8-ui/job/ngx-login-client/job/master/)](https://jenkins.cd.test.fabric8.io/job/fabric8-ui/job/ngx-login-client/job/master/) 
 [![npm version](https://badge.fury.io/js/ngx-login-client.svg)](https://badge.fury.io/js/ngx-login-client) 
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release) 
