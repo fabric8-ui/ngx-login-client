@@ -51,7 +51,7 @@ export let authApiUrlProvider = {
 ````
 
 NOTE: `ApiLocatorService` is a service that we use to construct API URLs using patterns determined
-by our application architecture, you can implement this part however you like.
+by our application architecture, you can implement this part however you like.  
 
 Finally you need to register `authApiUrlProvider` with a module or a component.
  
