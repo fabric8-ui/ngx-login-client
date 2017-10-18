@@ -38,7 +38,7 @@ export class AuthenticationService {
     this.ssoUrl = ssoUrl;
     this.realm = realm;
     this.openShiftToken = this.createFederatedToken(this.openshift, (response: Response) => response.json() as Token);
-    this.gitHubToken = this.createFederatedToken(this.github, (response: Response) => this.queryAsToken(response.text()));
+    this.gitHubToken = this.createFederatedToken(this.github, (response: Response) => response.json() as Token);
   }
 
   logIn(tokenParameter: string): boolean {
@@ -113,7 +113,7 @@ export class AuthenticationService {
     if (this.isLoggedIn()) {
       let headers = new Headers({ 'Content-Type': 'application/json' });
       let options: RequestOptions = new RequestOptions({ headers: headers });
-      let refreshTokenUrl = this.apiUrl + 'login/refresh';
+      let refreshTokenUrl = this.apiUrl + 'token/refresh';
       let refreshToken = localStorage.getItem('refresh_token');
       let body = JSON.stringify({ 'refresh_token': refreshToken });
       this.http.post(refreshTokenUrl, body, options)
@@ -150,6 +150,9 @@ export class AuthenticationService {
     let res = this.refreshTokens.switchMap(token => {
       let headers = new Headers({ 'Content-Type': 'application/json' });
       let tokenUrl = this.ssoUrl + `auth/realms/${this.realm}/broker/${broker}/token`;
+      if ( broker == this.github ){
+        tokenUrl = this.apiUrl + `token?for=https://github.com`;
+      }
       headers.set('Authorization', `Bearer ${token.access_token}`);
       let options = new RequestOptions({ headers: headers });
       return this.http.get(tokenUrl, options)
