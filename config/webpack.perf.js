@@ -12,7 +12,6 @@ const commonConfig = require('./webpack.common.js'); // the settings that are co
 const DefinePlugin = require('webpack/lib/DefinePlugin');
 const NamedModulesPlugin = require('webpack/lib/NamedModulesPlugin');
 const LoaderOptionsPlugin = require('webpack/lib/LoaderOptionsPlugin');
-const DashboardPlugin = require('webpack-dashboard/plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 /**
@@ -94,11 +93,6 @@ module.exports = function () {
       new BundleAnalyzerPlugin({
         generateStatsFile: true
       }),
-
-      /**
-       * Displays an overview of what webpack bundled.
-       */
-      new DashboardPlugin(),
 
       /**
        * Plugin: DefinePlugin
