@@ -72,8 +72,8 @@
     "npm": ">= 5.3.0"
   },
   "dependencies": {
-    "@angular/core": "^4.4.4",
-    "@angular/http": "^4.4.4",
+    "@angular/core": "^4.4.0",
+    "@angular/http": "^4.4.0",
     "lodash": "^4.17.4",
     "ngx-base": "^2.2.9",
     "rxjs": "^5.0.1"
@@ -81,13 +81,13 @@
   "peerDependencies": {
   },
   "devDependencies": {
-    "@angular/common": "^4.4.4",
-    "@angular/compiler": "^4.4.4",
-    "@angular/compiler-cli": "^4.4.4",
-    "@angular/forms": "^4.4.4",
-    "@angular/platform-browser": "^4.4.4",
-    "@angular/platform-browser-dynamic": "^4.4.4",
-    "@angular/router": "^4.4.4",
+    "@angular/common": "^4.4.0",
+    "@angular/compiler": "^4.4.0",
+    "@angular/compiler-cli": "^4.4.0",
+    "@angular/forms": "^4.4.0",
+    "@angular/platform-browser": "^4.4.0",
+    "@angular/platform-browser-dynamic": "^4.4.0",
+    "@angular/router": "^4.4.0",
     "@krux/condition-jenkins": "^1.0.1",
     "@types/jasmine": "^2.6.0",
     "@types/lodash": "^4.14.77",
