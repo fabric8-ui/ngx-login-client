@@ -74,8 +74,7 @@
     "ngx-base": "^2.3.0",
     "rxjs": "^5.0.1"
   },
-  "peerDependencies": {
-  },
+  "peerDependencies": {},
   "devDependencies": {
     "@angular/common": "^4.4.0",
     "@angular/compiler": "^4.4.0",
