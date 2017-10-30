@@ -5,7 +5,6 @@
 const helpers = require('./helpers');
 const path = require('path');
 const stringify = require('json-stringify');
-const sass = require('./sass');
 /**
  * Webpack Plugins
  */
@@ -15,7 +14,7 @@ const ContextReplacementPlugin = require('webpack/lib/ContextReplacementPlugin')
 const DefinePlugin = require('webpack/lib/DefinePlugin');
 const LoaderOptionsPlugin = require('webpack/lib/LoaderOptionsPlugin');
 // const ExtractTextPlugin = require('extract-text-webpack-plugin');
-
+const StyleLintPlugin = require('stylelint-webpack-plugin');
 /**
  * Webpack Constants
  */
@@ -31,6 +30,10 @@ const FABRIC8_RECOMMENDER_API_URL = process.env.FABRIC8_RECOMMENDER_API_URL || '
  */
 module.exports = function (options) {
   return {
+
+    // entry: {
+    //   'app': './index.ts'
+    // },
 
     /**
      * Source map for Karma from the help of karma-sourcemap-loader &  karma-webpack
@@ -84,15 +87,15 @@ module.exports = function (options) {
          *
          * See: https://github.com/webpack/source-map-loader
          */
-        {
-          test: /\.js$/,
-          use: ['source-map-loader'],
-          exclude: [
-            // these packages have problems with their sourcemaps
-            helpers.root('node_modules/rxjs'),
-            helpers.root('node_modules/@angular')
-          ]
-        },
+        // {
+        //   test: /\.js$/,
+        //   use: ['source-map-loader'],
+        //   exclude: [
+        //     // these packages have problems with their sourcemaps
+        //     helpers.root('node_modules/rxjs'),
+        //     helpers.root('node_modules/@angular')
+        //   ]
+        // },
 
         /**
          * Typescript loader support for .ts and Angular 2 async routes via .async.ts
@@ -102,8 +105,15 @@ module.exports = function (options) {
         {
           test: /\.ts$/,
           use: [
-            'awesome-typescript-loader',
-            'angular2-template-loader'
+            {
+              loader: "awesome-typescript-loader",
+              options: {
+                configFileName: 'tsconfig-test.json'
+              }
+            },
+            {
+              loader: "angular2-template-loader"
+            }
           ],
           exclude: [/\.e2e\.ts$/]
         },
@@ -138,18 +148,25 @@ module.exports = function (options) {
         },
 
         {
-          test: /\.scss$/,
-          loaders: [
+          test: /\.component\.less$/,
+          use: [
             {
               loader: 'to-string-loader'
             }, {
-              loader: 'css-loader'
+              loader: 'css-loader',
+              options: {
+                minimize: true,
+                sourceMap: true,
+                context: '/'
+              }
             }, {
-              loader: 'sass-loader',
-              query: {
-                includePaths: sass.modules.map(val => {
-                  return val.sassPath;
-                })
+              loader: 'less-loader',
+              options: {
+                paths: [
+                  path.resolve(__dirname, "../node_modules/patternfly/src/less"),
+                  path.resolve(__dirname, "../node_modules/patternfly/node_modules")
+                ],
+                sourceMap: true
               }
             }
           ]
@@ -251,7 +268,7 @@ module.exports = function (options) {
        */
       new ContextReplacementPlugin(
         // The (\\|\/) piece accounts for path separators in *nix and Windows
-        /angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,
+        /angular(\\|\/)core(\\|\/)@angular/,
         helpers.root('src') // location of your src
       ),
 
@@ -276,6 +293,17 @@ module.exports = function (options) {
             resourcePath: 'src'
           }
         }
+      }),
+      /*
+       * StyleLintPlugin
+       */
+      new StyleLintPlugin({
+        configFile: '.stylelintrc',
+        syntax: 'less',
+        context: 'src',
+        files: '**/*.less',
+        failOnError: true,
+        quiet: false,
       })
     ],
 
