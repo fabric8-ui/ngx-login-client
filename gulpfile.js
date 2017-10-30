@@ -1,19 +1,26 @@
 
-var gulp = require('gulp'),
-  runSequence = require('run-sequence'),
-  del = require('del'),
-  replace = require('gulp-string-replace'),
-  sourcemaps = require('gulp-sourcemaps'),
-  exec = require('child_process').exec,
-  ngc = require('gulp-ngc'),
+const gulp = require('gulp'),
+  autoprefixer = require('autoprefixer'),
+  LessAutoprefix = require('less-plugin-autoprefix'),
+  autoprefix = new LessAutoprefix({ browsers: ['last 2 versions'] }),
   changed = require('gulp-changed'),
+  cssmin = require('gulp-cssmin'),
+  del = require('del'),
+  exec = require('child_process').exec,
+  lessCompiler = require('gulp-less'),
+  ngc = require('gulp-ngc'),
   path = require('path'),
+  postcss = require('postcss'),
+  replace = require('gulp-string-replace'),
+  runSequence = require('run-sequence'),
+  sourcemaps = require('gulp-sourcemaps'),
+  stylus = require('stylus');
   util = require('gulp-util');
 
-var appSrc = 'src';
-var libraryDist = 'dist';
-var watchDist = 'dist-watch';
-var globalExcludes = [ '!./**/examples/**', '!./**/examples' ]
+const appSrc = 'src';
+const libraryDist = 'dist';
+const watchDist = 'dist-watch';
+const globalExcludes = [ '!./**/examples/**', '!./**/examples' ];
 
 /**
  * FUNCTION LIBRARY
@@ -33,38 +40,87 @@ function updateWatchDist() {
     .pipe(gulp.dest(watchDist));
 }
 
+function transpileLESS(src) {
+  return gulp.src(src)
+    .pipe(sourcemaps.init())
+    .pipe(lessCompiler({
+      paths: [ path.join(__dirname, 'less', 'includes') ]
+    }))
+    .pipe(cssmin().on('error', function(err) {
+      console.error(err);
+    }))
+    .pipe(sourcemaps.write())
+    .pipe(gulp.dest('./dist/src/'));
+}
+
+function minifyCSS(file) {
+  try {
+    let minifiedFile = stylus.render(file);
+    minifiedFile = postcss([autoprefixer]).process(minifiedFile).css;
+    minifiedFile = csso.minify(minifiedFile).css;
+    return minifiedFile;
+  } catch (err) {
+    console.error(err);
+  }
+}
 /**
  * TASKS
  */
 
+// Put the LESS files back to normal
+gulp.task('build-library',
+  [
+    'lint-less',
+    'transpile-less',
+    'transpile',
+    'post-transpile',
+    'copy-css',
+    'copy-html',
+    'copy-static-assets'
+  ]);
+
+// stylelint
+gulp.task('lint-less', function lintLessTask() {
+  const gulpStylelint = require ('gulp-stylelint');
+
+  return gulp
+  .src('src/**/*.less')
+  .pipe(gulpStylelint({
+    failAfterError: true,
+    reporters: [
+    {formatter: 'string', console: true}
+    ]
+  }));
+});
+
+// Less compilation - requires linting to complete before it will start
+gulp.task('transpile-less', ['lint-less'], function () {
+  return transpileLESS(appSrc + '/**/*.less');
+});
+
+// require transpile-less to finish before starting the transpile process
+gulp.task('transpile', ['transpile-less'], function () {
+  return ngc('tsconfig.json')
+});
+
+// require transpile to finish before the build starts the post-transpile task
 gulp.task('post-transpile', ['transpile'], function () {
   return gulp.src(['dist/src/app/**/*.js'])
     .pipe(replace(/templateUrl:\s/g, "template: require("))
     .pipe(replace(/\.html',/g, ".html'),"))
     .pipe(replace(/\.html'/g, ".html')"))
     .pipe(replace(/styleUrls: \[/g, "styles: [require("))
-    .pipe(replace(/\.scss']/g, ".css').toString()]"))
+    .pipe(replace(/\.less']/g, ".css').toString()]"))
     .pipe(gulp.dest(function (file) {
-      return file.base; // because of Angular 2's encapsulation, it's natural to save the css where the scss-file was
+      return file.base; // because of Angular's encapsulation, it's natural to save the css where the less-file was
     }));
 });
 
-//Sass compilation and minifiction
-gulp.task('transpile-sass', function () {
-  return transpileSASS(appSrc + '/app/**/*.scss');
-});
-
-// Put the SASS files back to normal
-gulp.task('build-library',
-  [
-    'transpile',
-    // 'post-transpile',
-    // 'copy-html',
-    'copy-static-assets'
+// require transpile to finish before copying the css
+gulp.task('copy-css', ['transpile'], function () {
+  return copyToDist([
+    'src/**/*.css'
   ]);
-
-gulp.task('transpile', function () {
-  return ngc('tsconfig.json')
 });
 
 gulp.task('copy-html', function () {
@@ -94,9 +150,9 @@ gulp.task('watch', ['build-library', 'copy-watch-all'], function () {
   gulp.watch([appSrc + '/app/**/*.ts', '!' + appSrc + '/app/**/*.spec.ts'], ['transpile', 'post-transpile', 'copy-watch']).on('change', function (e) {
     util.log(util.colors.cyan(e.path) + ' has been changed. Compiling.');
   });
-  gulp.watch([appSrc + '/app/**/*.scss']).on('change', function (e) {
+  gulp.watch([appSrc + '/app/**/*.less'], ['transpile-less']).on('change', function (e) {
     util.log(util.colors.cyan(e.path) + ' has been changed. Updating.');
-    transpileSASS(e.path);
+    transpileLESS(e.path);
     updateWatchDist();
   });
   gulp.watch([appSrc + '/app/**/*.html']).on('change', function (e) {
