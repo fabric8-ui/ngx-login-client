@@ -126,7 +126,7 @@ export class AuthenticationService {
 
       // ensure nothing breaks even if the corresponding changes in fabric8-ui/fabric8-ui
       // are not merged when this is released.
-      if ( this.apiUrl.startsWith("https://api.") ){
+      if ( this.apiUrl.startsWith("https://api.") || this.apiUrl.startsWith("http://localhost:8080") ){
         // keep the old one.
         refreshTokenUrl = this.apiUrl + 'login/refresh';
       }
@@ -166,7 +166,7 @@ export class AuthenticationService {
     let res = this.refreshTokens.switchMap(token => {
       let headers = new Headers({ 'Content-Type': 'application/json' });
       let tokenUrl = this.ssoUrl + `auth/realms/${this.realm}/broker/${broker}/token`;
-      if ( broker == this.github && !this.apiUrl.startsWith("https://api.") ){
+      if ( broker == this.github && !this.apiUrl.startsWith("https://api.") && !this.apiUrl.startsWith("http://localhost:8080") ){
         // the second condition ensures that if this commit moves to master
         // nothing breaks even if the corresponding changes in fabric8-ui/fabric8-ui are
         // yet to be merged.
