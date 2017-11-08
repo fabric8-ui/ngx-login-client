@@ -38,9 +38,9 @@ export class AuthenticationService {
     this.ssoUrl = ssoUrl;
     this.realm = realm;
     this.openShiftToken = this.createFederatedToken(this.openshift, (response: Response) => response.json() as Token);
-    
+
     // TODO: Remove the conditional block after fabric8-ui's related changes are in master
-    if ( ! this.apiUrl.startsWith("https://api.") ){
+    if ( !this.apiUrl.startsWith("https://api.") && !this.apiUrl.startsWith("http://localhost:8080")) {
       this.gitHubToken = this.createFederatedToken(this.github, (response: Response) => response.json() as Token);
     }
     else{
