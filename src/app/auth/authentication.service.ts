@@ -38,15 +38,7 @@ export class AuthenticationService {
     this.ssoUrl = ssoUrl;
     this.realm = realm;
     this.openShiftToken = this.createFederatedToken(this.openshift, (response: Response) => response.json() as Token);
-
-    // TODO: Remove the conditional block after fabric8-ui's related changes are in master
-    if ( !this.apiUrl.startsWith("https://api.") && !this.apiUrl.startsWith("http://localhost:8080")) {
-      this.gitHubToken = this.createFederatedToken(this.github, (response: Response) => response.json() as Token);
-    }
-    else{
-      this.gitHubToken = this.createFederatedToken(this.github, (response: Response) => this.queryAsToken(response.text()));
-    }
-
+    this.gitHubToken = this.createFederatedToken(this.github, (response: Response) => response.json() as Token);
   }
 
   logIn(tokenParameter: string): boolean {
@@ -122,14 +114,6 @@ export class AuthenticationService {
       let headers = new Headers({ 'Content-Type': 'application/json' });
       let options: RequestOptions = new RequestOptions({ headers: headers });
       let refreshTokenUrl = this.apiUrl + 'token/refresh';
-
-
-      // ensure nothing breaks even if the corresponding changes in fabric8-ui/fabric8-ui
-      // are not merged when this is released.
-      if ( this.apiUrl.startsWith("https://api.") || this.apiUrl.startsWith("http://localhost:8080") ){
-        // keep the old one.
-        refreshTokenUrl = this.apiUrl + 'login/refresh';
-      }
       let refreshToken = localStorage.getItem('refresh_token');
       let body = JSON.stringify({ 'refresh_token': refreshToken });
       this.http.post(refreshTokenUrl, body, options)
@@ -166,10 +150,7 @@ export class AuthenticationService {
     let res = this.refreshTokens.switchMap(token => {
       let headers = new Headers({ 'Content-Type': 'application/json' });
       let tokenUrl = this.ssoUrl + `auth/realms/${this.realm}/broker/${broker}/token`;
-      if ( broker == this.github && !this.apiUrl.startsWith("https://api.") && !this.apiUrl.startsWith("http://localhost:8080") ){
-        // the second condition ensures that if this commit moves to master
-        // nothing breaks even if the corresponding changes in fabric8-ui/fabric8-ui are
-        // yet to be merged.
+      if ( broker == this.github ){
         tokenUrl = this.apiUrl + `token?for=https://github.com`;
       }
       headers.set('Authorization', `Bearer ${token.access_token}`);
