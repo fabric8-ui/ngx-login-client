@@ -46,7 +46,7 @@ export class HttpService extends Http {
 
   private catchRequestError () {
     return (res: Response) => {
-      if (res.status === 401 || res.status === 403) {
+      if (res.status === 403 || ( res.status === 401 && !res.headers.has("www-authenticate"))) {
         this.broadcaster.broadcast('authenticationError', res);
       } else if (res.status === 500) {
         this.broadcaster.broadcast('communicationError', res);
