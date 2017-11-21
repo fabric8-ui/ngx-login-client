@@ -100,7 +100,9 @@ export class AuthenticationService {
       let refreshInMs = Math.round(refreshInSeconds * .9) * 1000;
       console.log('Refreshing token in: ' + refreshInMs + ' milliseconds.');
       this.refreshInterval = refreshInMs;
-      if (process.env.ENV !== 'inmemory') {
+      // Disable token refresh timeout when LOGIN_CLIENT_NO_REFRESH is set
+      // This is necessary to run fabric8-planner end-to-end tests
+      if ( ! (process.env.ENV === 'inmemory' || process.env.ENV === 'LOGIN_CLIENT_NO_REFRESH')) {
         // setTimeout() uses a 32 bit int to store the delay. So the max value allowed is 2147483647
         // The bigger number will cause immediate refreshing
         // but since we refresh in 10 minutes or in refreshInSeconds whatever is sooner we are good
