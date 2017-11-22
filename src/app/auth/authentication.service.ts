@@ -1,6 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { Http, Response, Headers, RequestOptions, RequestOptionsArgs } from '@angular/http';
 
+import jwt_decode from 'jwt-decode';
 import { Observable, Subject } from 'rxjs';
 import { Broadcaster, Logger } from 'ngx-base';
 
@@ -8,7 +9,6 @@ import { AUTH_API_URL } from '../shared/auth-api';
 import { SSO_API_URL } from '../shared/sso-api';
 import { REALM } from '../shared/realm-token';
 import { Token } from '../user/token';
-import * as jwt_decode from 'jwt-decode';
 
 export interface ProcessTokenResponse {
   (response: Response): Token;
@@ -24,7 +24,7 @@ export class AuthenticationService {
   private ssoUrl: string;
   private realm: string;
   private clearTimeoutId: any;
-  private headers = new Headers({ 'Content-Type': 'application/json' });
+  private headers: Headers = new Headers({ 'Content-Type': 'application/json' });
   private refreshTokens: Subject<Token> = new Subject();
   readonly openshift = 'openshift-v3';
   readonly github = 'github';
@@ -156,24 +156,24 @@ export class AuthenticationService {
     //let headers = new Headers({ 'Content-Type': 'application/json' });
     //let options: RequestOptions = new RequestOptions({ headers: headers });
     let tokenUrl = this.apiUrl + 'token/link';
-    var form = document.createElement("form");
+    let form = document.createElement("form");
 
     // Create the for parameter
-    var inputFor = document.createElement("input");
+    let inputFor = document.createElement("input");
     inputFor.type = "hidden";
     inputFor.name = "for";
     inputFor.value = "https://github.com";
     form.appendChild(inputFor);
 
     // Create the token parameter
-    var inputToken = document.createElement("input");
+    let inputToken = document.createElement("input");
     inputToken.type = "hidden";
     inputToken.name = "token";
     inputToken.value = this.getToken();
     form.appendChild(inputToken);
 
     // Create the redirect parameter
-    var inputRedirect = document.createElement("input");
+    let inputRedirect = document.createElement("input");
     inputRedirect.type = "hidden";
     inputRedirect.name = "redirect";
     inputRedirect.value = redirectUrl;
@@ -189,10 +189,11 @@ export class AuthenticationService {
     let tokenUrl = this.apiUrl + 'token?for=https://github.com';
     const xhr = new XMLHttpRequest();
     xhr.open("delete", tokenUrl);
+    var that = this;
     xhr.onreadystatechange = function (evt) {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
-          console.log(xhr.responseText)
+          // TODO need to refresh the token value here
         } else {
           console.log("Error", xhr.statusText);
         }
@@ -215,8 +216,7 @@ export class AuthenticationService {
   connectOpenShift(redirectUrl: string) {
     let parsedToken: any = jwt_decode(this.getToken());
     let url = this.apiUrl + 'link/session?' +
-      "clientSession=" + parsedToken.client_session +
-      "&sessionState=" + parsedToken.session_state + 
+      "&sessionState=" + parsedToken.session_state +
       "&provider=openshift-v3" +
       "&redirect=" + redirectUrl;
     window.location.href = url;
@@ -229,7 +229,7 @@ export class AuthenticationService {
     xhr.onreadystatechange = function (evt) {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
-          console.log(xhr.responseText)
+          // TODO need to refresh the token value here
         } else {
           console.log("Error", xhr.statusText);
         }
