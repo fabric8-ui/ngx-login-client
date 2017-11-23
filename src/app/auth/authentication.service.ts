@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable, Inject, NgZone } from '@angular/core';
 import { Http, Response, Headers, RequestOptions, RequestOptionsArgs } from '@angular/http';
 
 import { Observable, Subject } from 'rxjs';
@@ -32,7 +32,8 @@ export class AuthenticationService {
     @Inject(AUTH_API_URL) apiUrl: string,
     @Inject(SSO_API_URL) ssoUrl: string,
     @Inject(REALM) realm: string,
-    private http: Http
+    private http: Http,
+    private ngZone: NgZone
   ) {
     this.apiUrl = apiUrl;
     this.ssoUrl = ssoUrl;
@@ -100,12 +101,15 @@ export class AuthenticationService {
       let refreshInMs = Math.round(refreshInSeconds * .9) * 1000;
       console.log('Refreshing token in: ' + refreshInMs + ' milliseconds.');
       this.refreshInterval = refreshInMs;
-      if (process.env.ENV !== 'inmemory') {
-        // setTimeout() uses a 32 bit int to store the delay. So the max value allowed is 2147483647
-        // The bigger number will cause immediate refreshing
-        // but since we refresh in 10 minutes or in refreshInSeconds whatever is sooner we are good
-        this.clearTimeoutId = setTimeout(() => this.refreshToken(), refreshInMs);
-      }
+      // Run setTimeout outside angular zone. Without this, all protractor tests fail with
+      // "Waiting for Angular" timeout as protractor waits indefinitely.
+      // https://github.com/angular/protractor/blob/master/docs/timeouts.md#angular
+      this.ngZone.runOutsideAngular(() => {
+          // setTimeout() uses a 32 bit int to store the delay. So the max value allowed is 2147483647
+          // The bigger number will cause immediate refreshing
+          // but since we refresh in 10 minutes or in refreshInSeconds whatever is sooner we are good
+          this.clearTimeoutId = setTimeout(() => this.refreshToken(), refreshInMs);
+      });
     }
   }
 
