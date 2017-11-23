@@ -189,7 +189,7 @@ export class AuthenticationService {
     let tokenUrl = this.apiUrl + 'token?for=https://github.com';
     const xhr = new XMLHttpRequest();
     xhr.open("delete", tokenUrl);
-    var that = this;
+    let gh = this.gitHubToken;
     xhr.onreadystatechange = function (evt) {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
