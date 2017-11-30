@@ -14,6 +14,10 @@ export interface ProcessTokenResponse {
   (response: Response): Token;
 }
 
+export class Link {
+    redirect_location: string;
+}
+
 @Injectable()
 export class AuthenticationService {
 
@@ -151,40 +155,23 @@ export class AuthenticationService {
     localStorage.setItem('refresh_token', token.refresh_token);
     return token;
   }
-  
+
   connectGitHub(redirectUrl: string) {
-    //let headers = new Headers({ 'Content-Type': 'application/json' });
-    //let options: RequestOptions = new RequestOptions({ headers: headers });
-    let tokenUrl = this.apiUrl + 'token/link';
-    let form = document.createElement("form");
-
-    // Create the for parameter
-    let inputFor = document.createElement("input");
-    inputFor.type = "hidden";
-    inputFor.name = "for";
-    inputFor.value = "https://github.com";
-    form.appendChild(inputFor);
-
-    // Create the token parameter
-    let inputToken = document.createElement("input");
-    inputToken.type = "hidden";
-    inputToken.name = "token";
-    inputToken.value = this.getToken();
-    form.appendChild(inputToken);
-
-    // Create the redirect parameter
-    let inputRedirect = document.createElement("input");
-    inputRedirect.type = "hidden";
-    inputRedirect.name = "redirect";
-    inputRedirect.value = redirectUrl;
-    form.appendChild(inputRedirect);
-
-    form.action = tokenUrl;
-    form.method = "POST";
-    document.body.appendChild(form);
-    form.submit();
+    let tokenUrl = this.apiUrl + 'token/link?for=https://github.com&redirect=' + encodeURIComponent(redirectUrl);
+    this.http
+    .get(tokenUrl)
+    .map(response => {
+      // TODO: what happens to this when the response is not pure json
+      let redirectInfo = response.json() as Link;
+      window.location.href = redirectInfo.redirect_location;
+      console.log(redirectInfo);
+    })
+    .catch((error) => {
+      console.log("Error while connecting GitHub account "+ tokenUrl);
+      return this.handleError(error);
+    }).subscribe();
   }
-  
+
   disconnectGitHub() {
     let tokenUrl = this.apiUrl + 'token?for=https://github.com';
     const xhr = new XMLHttpRequest();
