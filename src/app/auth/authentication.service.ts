@@ -1,8 +1,9 @@
 import { Injectable, Inject } from '@angular/core';
 import { Http, Response, Headers, RequestOptions, RequestOptionsArgs } from '@angular/http';
 
+import jwt_decode from 'jwt-decode';
 import { Observable, Subject } from 'rxjs';
-import { Broadcaster } from 'ngx-base';
+import { Broadcaster, Logger } from 'ngx-base';
 
 import { AUTH_API_URL } from '../shared/auth-api';
 import { SSO_API_URL } from '../shared/sso-api';
@@ -11,6 +12,10 @@ import { Token } from '../user/token';
 
 export interface ProcessTokenResponse {
   (response: Response): Token;
+}
+
+export class Link {
+    redirect_location: string;
 }
 
 @Injectable()
@@ -23,6 +28,7 @@ export class AuthenticationService {
   private ssoUrl: string;
   private realm: string;
   private clearTimeoutId: any;
+  private headers: Headers = new Headers({ 'Content-Type': 'application/json' });
   private refreshTokens: Subject<Token> = new Subject();
   readonly openshift = 'openshift-v3';
   readonly github = 'github';
@@ -32,13 +38,17 @@ export class AuthenticationService {
     @Inject(AUTH_API_URL) apiUrl: string,
     @Inject(SSO_API_URL) ssoUrl: string,
     @Inject(REALM) realm: string,
-    private http: Http
+    private http: Http,
+    private logger: Logger
   ) {
     this.apiUrl = apiUrl;
     this.ssoUrl = ssoUrl;
     this.realm = realm;
     this.openShiftToken = this.createFederatedToken(this.openshift, (response: Response) => response.json() as Token);
     this.gitHubToken = this.createFederatedToken(this.github, (response: Response) => response.json() as Token);
+    if (this.getToken() != null) {
+      this.headers.set('Authorization', 'Bearer ' + this.getToken());
+    }
   }
 
   logIn(tokenParameter: string): boolean {
@@ -144,6 +154,91 @@ export class AuthenticationService {
     localStorage.setItem('auth_token', token.access_token);
     localStorage.setItem('refresh_token', token.refresh_token);
     return token;
+  }
+
+  connectGitHub(redirectUrl: string) {
+    let tokenUrl = this.apiUrl + 'token/link?for=https://github.com&redirect=' + encodeURIComponent(redirectUrl);
+    this.http
+    .get(tokenUrl)
+    .map(response => {
+      // TODO: what happens to this when the response is not pure json
+      let redirectInfo = response.json() as Link;
+      window.location.href = redirectInfo.redirect_location;
+      console.log(redirectInfo);
+    })
+    .catch((error) => {
+      console.log("Error while connecting GitHub account "+ tokenUrl);
+      return this.handleError(error);
+    }).subscribe();
+  }
+
+  disconnectGitHub() {
+    let tokenUrl = this.apiUrl + 'token?for=https://github.com';
+    const xhr = new XMLHttpRequest();
+    xhr.open("delete", tokenUrl);
+    let gh = this.gitHubToken;
+    xhr.onreadystatechange = function (evt) {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          // TODO need to refresh the token value here
+        } else {
+          console.log("Error", xhr.statusText);
+        }
+      }
+    }
+    
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("Authorization", "Bearer " + this.getToken());
+    xhr.send();
+
+    // DOESN'T WORK
+    //return this.http
+    //  .delete (tokenUrl, { headers: this.headers })
+    //  .map( () => {})
+    //  .catch((error) => {
+    //    return this.handleError(error);
+    //  });
+  }
+
+  connectOpenShift(redirectUrl: string) {
+    let parsedToken: any = jwt_decode(this.getToken());
+    let url = this.apiUrl + 'link/session?' +
+      "&sessionState=" + parsedToken.session_state +
+      "&provider=openshift-v3" +
+      "&redirect=" + redirectUrl;
+    window.location.href = url;
+  }
+
+  disconnectOpenShift(openshiftApiUrl: string) {
+    let tokenUrl = this.apiUrl + 'token?for=' + openshiftApiUrl;
+    const xhr = new XMLHttpRequest();
+    xhr.open("delete", tokenUrl);
+    xhr.onreadystatechange = function (evt) {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          // TODO need to refresh the token value here
+        } else {
+          console.log("Error", xhr.statusText);
+        }
+      }
+    }
+    
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("Authorization", "Bearer " + this.getToken());
+    xhr.send();
+
+    // DOESN'T WORK
+    //return this.http
+    //  .delete (tokenUrl, { headers: this.headers })
+    //  .map( () => {})
+    //  .catch((error) => {
+    //    return this.handleError(error);
+    //  });
+  }
+
+  private handleError(error: any) {
+    this.logger.error(error);
+    return Observable.throw(error.message || error);
   }
 
   private createFederatedToken(broker: string, processToken: ProcessTokenResponse): Observable<string> {
