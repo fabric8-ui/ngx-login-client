@@ -146,6 +146,10 @@ export class AuthenticationService {
     return token;
   }
 
+  getGitHubToken(): string {
+    return localStorage.getItem(this.github + '_token');
+  }
+
   clearGitHubToken(): void {
     localStorage.removeItem(this.github + '_token');
     this.gitHubToken = Observable.of('');

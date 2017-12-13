@@ -220,8 +220,30 @@ describe('Service: Authentication service', () => {
       // token should be empty after token is cleared
       expect(output).toBe('');
       expect(localStorage.getItem('github_token')).toBeNull();
+      expect(authenticationService.getGitHubToken()).toBeNull();
       authenticationService.logout();
       done();
     });
+  });
+
+  it('Github token processing', (done) => {
+    // given
+    mockService.connections.subscribe((connection: any) => {
+      connection.mockRespond(new Response(
+        new ResponseOptions({
+          body: tokenJson,
+          status: 201
+        })
+      ));
+    });
+    spyOn(authenticationService, 'setupRefreshTimer');
+
+    broadcaster.on('loggedin').subscribe((data: number) => {
+      let token = JSON.parse(tokenJson);
+      expect(authenticationService.getGitHubToken()).toBe(token.access_token);
+      done();
+    });
+
+    authenticationService.logIn(tokenJson);
   });
 });
