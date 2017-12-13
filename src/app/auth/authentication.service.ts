@@ -146,6 +146,11 @@ export class AuthenticationService {
     return token;
   }
 
+  clearGitHubToken(): void {
+    localStorage.removeItem(this.github + '_token');
+    this.gitHubToken = Observable.of('');
+  }
+
   private createFederatedToken(broker: string, processToken: ProcessTokenResponse): Observable<string> {
     let res = this.refreshTokens.switchMap(token => {
       let headers = new Headers({ 'Content-Type': 'application/json' });
@@ -163,7 +168,13 @@ export class AuthenticationService {
           }
           return Observable.of({} as Token);
         })
-        .do(token => localStorage.setItem(broker + '_token', token.access_token))
+        .do(token => {
+          if (token.access_token) {
+            localStorage.setItem(broker + '_token', token.access_token);
+          } else {
+            localStorage.removeItem(broker + '_token');
+          }
+        })
         .map(t => t.access_token);
     })
       .publishReplay(1);
