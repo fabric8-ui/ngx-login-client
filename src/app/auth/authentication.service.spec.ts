@@ -171,4 +171,57 @@ describe('Service: Authentication service', () => {
       expect(localStorage.getItem('openshift-v3_token')).toBeNull();
     });
   }));
+
+  it('Github token processing', (done) => {
+    // given
+    mockService.connections.subscribe((connection: any) => {
+      connection.mockRespond(new Response(
+        new ResponseOptions({
+          body: tokenJson,
+          status: 201
+        })
+      ));
+    });
+    spyOn(authenticationService, 'setupRefreshTimer');
+
+    broadcaster.on('loggedin').subscribe((data: number) => {
+      let token = JSON.parse(tokenJson);
+      authenticationService.gitHubToken.subscribe(output => {
+        // then
+        expect(output == token.access_token);
+        expect(localStorage.getItem('github_token')).toBe(token.access_token);
+        authenticationService.logout();
+        done();
+      });
+    });
+
+    authenticationService.logIn(tokenJson);
+  });
+
+  it('Github token clear', (done) => {
+    // given
+    mockService.connections.subscribe((connection: any) => {
+      connection.mockRespond(new Response(
+        new ResponseOptions({
+          body: tokenJson,
+          status: 201
+        })
+      ));
+    });
+    spyOn(authenticationService, 'setupRefreshTimer');
+
+    broadcaster.on('loggedin').subscribe((data: number) => {
+      expect(localStorage.getItem('github_token')).not.toBeNull();
+      authenticationService.clearGitHubToken();
+    });
+    authenticationService.logIn(tokenJson);
+
+    authenticationService.gitHubToken.subscribe(output => {
+      // token should be empty after token is cleared
+      expect(output).toBe('');
+      expect(localStorage.getItem('github_token')).toBeNull();
+      authenticationService.logout();
+      done();
+    });
+  });
 });
