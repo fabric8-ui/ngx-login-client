@@ -8,4 +8,5 @@ export class Profile {
   bio?: string;
   url?: string;
   email?: string;
+  cluster?: string;
 }
