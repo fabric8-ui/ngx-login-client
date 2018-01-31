@@ -155,6 +155,33 @@ describe('Service: Authentication service', () => {
     authenticationService.logIn(tokenJson);
   });
 
+  it('Openshift proxy token retrieval', (done) => {
+    // given
+    mockService.connections.subscribe((connection: any) => {
+      connection.mockRespond(new Response(
+        new ResponseOptions({
+          body: tokenJson,
+          status: 201
+        })
+      ));
+    });
+    spyOn(authenticationService, 'setupRefreshTimer');
+
+    broadcaster.on('loggedin').subscribe((data: number) => {
+      let token = JSON.parse(tokenJson);
+      authenticationService.getOpenShiftToken().subscribe(output => {
+        // then
+        expect(output == authenticationService.getToken());
+        authenticationService.logout();
+        done();
+      });
+    });
+
+    // when
+    authenticationService.logIn(tokenJson);
+  });
+
+
   it('Openshift token processing - not logged in', async(() => {
       mockService.connections.subscribe((connection: any) => {
       connection.mockRespond(new Response(

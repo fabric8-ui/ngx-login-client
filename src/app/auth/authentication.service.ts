@@ -38,6 +38,7 @@ export class AuthenticationService {
     this.apiUrl = apiUrl;
     this.ssoUrl = ssoUrl;
     this.realm = realm;
+    // this is still returning the actual openshift token to detect if the user is logged in or not
     this.openShiftToken = this.createFederatedToken(this.openshift, (response: Response) => response.json() as Token);
     this.gitHubToken = this.createFederatedToken(this.github, (response: Response) => response.json() as Token);
   }
@@ -80,15 +81,18 @@ export class AuthenticationService {
     return false;
   }
 
-  getToken() {
-    if (this.isLoggedIn()) return localStorage.getItem('auth_token');
+  getToken(): string {
+    if (this.isLoggedIn()) {
+      return localStorage.getItem('auth_token');
+    }
+    return '';
   }
 
+  /**
+   * Deprecated method - should be replaced with simple getToken() for connecting to OpenShift proxy now
+   */
   getOpenShiftToken(): Observable<string> {
-    if (localStorage.getItem(this.openshift + '_token')) {
-      return Observable.of(localStorage.getItem(this.openshift + '_token'));
-    }
-    return this.openShiftToken;
+    return Observable.of(this.getToken());
   }
 
   setupRefreshTimer(refreshInSeconds: number) {
