@@ -181,6 +181,56 @@ describe('Service: Authentication service', () => {
     authenticationService.logIn(tokenJson);
   });
 
+  it('Openshift valid connection test', (done) => {
+    // given
+    mockService.connections.subscribe((connection: any) => {
+      connection.mockRespond(new Response(
+        new ResponseOptions({
+          body: tokenJson,
+          status: 200
+        })
+      ));
+    });
+    spyOn(authenticationService, 'setupRefreshTimer');
+
+    broadcaster.on('loggedin').subscribe((data: number) => {
+      authenticationService.isOpenShiftConnected('cluster').subscribe((output) => {
+        // then
+        expect(output).toBe(true);
+        authenticationService.logout();
+        done();
+      });
+    });
+
+    // when
+    authenticationService.logIn(tokenJson);
+  });
+
+  it('Openshift failed connection test', (done) => {
+    // given
+    mockService.connections.subscribe((connection: any) => {
+      connection.mockError(new Response(
+        new ResponseOptions({
+          body: tokenJson,
+          status: 401
+        })
+      ));
+    });
+    spyOn(authenticationService, 'setupRefreshTimer');
+
+    broadcaster.on('loggedin').subscribe((data: number) => {
+      authenticationService.isOpenShiftConnected('cluster').subscribe((output) => {
+        // then
+        expect(output).toBe(false);
+        authenticationService.logout();
+        done();
+      });
+    });
+
+    // when
+    authenticationService.logIn(tokenJson);
+  });
+
 
   it('Openshift token processing - not logged in', async(() => {
       mockService.connections.subscribe((connection: any) => {
