@@ -95,6 +95,34 @@ export class AuthenticationService {
     return Observable.of(this.getToken());
   }
 
+
+  /*
+  This is a temporary function to check if the openshift online token is 
+  avaiable and that whether the user had connected her openshift online 
+  account. The only place where this would come handy is the Getting Started
+  page 
+  */
+  getLegacyOpenShiftToken(cluster: string, processToken: ProcessTokenResponse): Observable<string> {
+    let res = this.refreshTokens.switchMap(token => {
+      let headers = new Headers({ 'Content-Type': 'application/json' });
+      let tokenUrl = this.apiUrl + `token?for=`+cluster;
+      headers.set('Authorization', `Bearer ${token.access_token}`);
+      let options = new RequestOptions({ headers: headers });
+      return this.http.get(tokenUrl, options)
+        .map(response => processToken(response))
+        .catch(response => {
+          if (response.status === 400) {
+            this.broadcaster.broadcast('noFederatedToken', res);
+          }
+          return Observable.of({} as Token);
+        })
+       .map(t => t.access_token);
+    })
+      .publishReplay(1);
+    res.connect();
+    return res;
+  }
+
   setupRefreshTimer(refreshInSeconds: number) {
     if (!this.clearTimeoutId) {
       // refresh should be required to be less than ten minutes measured in seconds
