@@ -95,6 +95,23 @@ export class AuthenticationService {
     return Observable.of(this.getToken());
   }
 
+  isOpenShiftConnected(cluster: string): Observable<boolean> {
+    let headers = new Headers({ 'Content-Type': 'application/json' });
+    let tokenUrl = this.apiUrl + `token?for=`+cluster;
+    headers.set('Authorization', `Bearer ${this.getToken()}`);
+    let options = new RequestOptions({ headers: headers });
+    return this.http.get(tokenUrl, options)
+      .map(() => {
+        // token returned, openshift is connected
+        return true;
+      })
+      .catch(() => {
+        // with any exception coming back, return false
+        return Observable.of(false);
+      });
+  }
+
+
   setupRefreshTimer(refreshInSeconds: number) {
     if (!this.clearTimeoutId) {
       // refresh should be required to be less than ten minutes measured in seconds
