@@ -128,33 +128,6 @@ describe('Service: Authentication service', () => {
     authenticationService.logIn(tokenJson);
   });
 
-  it('Openshift token processing', (done) => {
-    // given
-    mockService.connections.subscribe((connection: any) => {
-      connection.mockRespond(new Response(
-        new ResponseOptions({
-          body: tokenJson,
-          status: 201
-        })
-      ));
-    });
-    spyOn(authenticationService, 'setupRefreshTimer');
-
-    broadcaster.on('loggedin').subscribe((data: number) => {
-      let token = JSON.parse(tokenJson);
-      authenticationService.getOpenShiftToken().subscribe(output => {
-        // then
-        expect(output == token.access_token);
-        expect(localStorage.getItem('openshift-v3_token')).toBe(token.access_token);
-        authenticationService.logout();
-        done();
-      });
-    });
-
-    // when
-    authenticationService.logIn(tokenJson);
-  });
-
   it('Openshift proxy token retrieval', (done) => {
     // given
     mockService.connections.subscribe((connection: any) => {
