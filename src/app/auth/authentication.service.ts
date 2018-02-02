@@ -16,7 +16,6 @@ export interface ProcessTokenResponse {
 @Injectable()
 export class AuthenticationService {
 
-  public openShiftToken: Observable<string>;
   public gitHubToken: Observable<string>;
   private refreshInterval: number;
   private apiUrl: string;
@@ -38,8 +37,6 @@ export class AuthenticationService {
     this.apiUrl = apiUrl;
     this.ssoUrl = ssoUrl;
     this.realm = realm;
-    // this is still returning the actual openshift token to detect if the user is logged in or not
-    this.openShiftToken = this.createFederatedToken(this.openshift, (response: Response) => response.json() as Token);
     this.gitHubToken = this.createFederatedToken(this.github, (response: Response) => response.json() as Token);
   }
 
