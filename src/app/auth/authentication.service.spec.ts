@@ -232,23 +232,6 @@ describe('Service: Authentication service', () => {
   });
 
 
-  it('Openshift token processing - not logged in', async(() => {
-      mockService.connections.subscribe((connection: any) => {
-      connection.mockRespond(new Response(
-        new ResponseOptions({
-          body: tokenJson,
-          status: 200
-        })
-      ));
-    });
-    spyOn(authenticationService, 'setupRefreshTimer');
-
-    authenticationService.getOpenShiftToken().subscribe(output => {
-      expect(output == '');
-      expect(localStorage.getItem('openshift-v3_token')).toBeNull();
-    });
-  }));
-
   it('Github token processing', (done) => {
     // given
     mockService.connections.subscribe((connection: any) => {
