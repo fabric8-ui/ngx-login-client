@@ -24,9 +24,15 @@ import { User } from './user';
 export class UserService {
 
   /**
-   * The currently logged in user
+   * The currently logged in user - please use currentLoggedInUser instead of subscribing
+   * TODO: move this to deprecated
    */
   public loggedInUser: ConnectableObservable<User>;
+
+  /**
+   * The current logged in user - should be always populated after login
+   */
+  public currentLoggedInUser: User;
 
   /**
    * @deprecated since v0.4.4. Use {@link #loggedInUser} instead.
@@ -51,6 +57,8 @@ export class UserService {
     this.userUrl = apiUrl + 'user';
     this.usersUrl = apiUrl + 'users';
     this.searchUrl = apiUrl + 'search';
+    // TODO - switch to internal observable that is populated on initialization
+    // and only expose currentLoggedInUser publicly
     this.loggedInUser = Observable.merge(
       broadcaster.on('loggedin')
         .map(val => 'loggedIn'),
@@ -70,8 +78,11 @@ export class UserService {
           return Observable.of({} as User);
         }
       })
-      // TODO remove this
-      .do(user => this.userData = user)
+      .do(user => {
+        this.currentLoggedInUser = user;
+        // TODO remove this - ensure nobody is using userData anymore
+        this.userData = user;
+      })
       // In order to ensure any future subscribers get the currently user
       // we use a replay subject of size 1
       .multicast(() => new ReplaySubject(1));
@@ -160,9 +171,9 @@ export class UserService {
   }
 
   /**
-   * 
+   *
    * Filter users by username
-   * 
+   *
    * @returns Observable<User[]>
    */
 

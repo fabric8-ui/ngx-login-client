@@ -80,6 +80,7 @@ describe('Service: User service', () => {
     broadcaster.on('loggedin').subscribe((data: number) => {
       userService.loggedInUser.subscribe((user) => {
         expect(user.id).toEqual(testUser.id);
+        expect(userService.currentLoggedInUser.id).toEqual(testUser.id);
         done();
       });
     });
@@ -99,6 +100,7 @@ describe('Service: User service', () => {
     broadcaster.on('logout').subscribe(() => {
       userService.loggedInUser.subscribe((user) => {
         expect(user).toBeDefined();
+        expect(userService.currentLoggedInUser).not.toBeNull();
         done();
       });
     });
