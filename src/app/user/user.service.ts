@@ -32,7 +32,7 @@ export class UserService {
   /**
    * The current logged in user - should be always populated after login
    */
-  public currentLoggedInUser: User;
+  public currentLoggedInUser: User = {} as User;
 
   /**
    * @deprecated since v0.4.4. Use {@link #loggedInUser} instead.
