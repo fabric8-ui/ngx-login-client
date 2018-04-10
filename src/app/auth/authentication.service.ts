@@ -17,14 +17,15 @@ export interface ProcessTokenResponse {
 export class AuthenticationService {
 
   public gitHubToken: Observable<string>;
+  public readonly openshift = 'openshift-v3';
+  public readonly github = 'github';
+
   private refreshInterval: number;
   private apiUrl: string;
   private ssoUrl: string;
   private realm: string;
   private clearTimeoutId: any;
   private refreshTokens: Subject<Token> = new Subject();
-  readonly openshift = 'openshift-v3';
-  readonly github = 'github';
 
   constructor(
     private broadcaster: Broadcaster,
@@ -70,7 +71,7 @@ export class AuthenticationService {
     if (token) {
       if (!this.clearTimeoutId) {
         // kick off initial token refresh
-        this.refreshTokens.next({ "access_token": token } as Token);
+        this.refreshTokens.next({ 'access_token' : token } as Token);
         this.setupRefreshTimer(15);
       }
       return true;
@@ -94,7 +95,7 @@ export class AuthenticationService {
 
   isOpenShiftConnected(cluster: string): Observable<boolean> {
     let headers = new Headers({ 'Content-Type': 'application/json' });
-    let tokenUrl = this.apiUrl + `token?for=`+cluster;
+    let tokenUrl = this.apiUrl + `token?for=` + cluster;
     headers.set('Authorization', `Bearer ${this.getToken()}`);
     let options = new RequestOptions({ headers: headers });
     return this.http.get(tokenUrl, options)
@@ -178,10 +179,10 @@ export class AuthenticationService {
   }
 
   private createFederatedToken(broker: string, processToken: ProcessTokenResponse): Observable<string> {
-    let res = this.refreshTokens.switchMap(token => {
+    let res = this.refreshTokens.switchMap((token: Token) => {
       let headers = new Headers({ 'Content-Type': 'application/json' });
       let tokenUrl = this.ssoUrl + `auth/realms/${this.realm}/broker/${broker}/token`;
-      if ( broker == this.github ){
+      if ( broker === this.github ) {
         tokenUrl = this.apiUrl + `token?for=https://github.com`;
       }
       headers.set('Authorization', `Bearer ${token.access_token}`);
@@ -194,14 +195,14 @@ export class AuthenticationService {
           }
           return Observable.of({} as Token);
         })
-        .do(token => {
-          if (token.access_token) {
-            localStorage.setItem(broker + '_token', token.access_token);
+        .do((shadowToken: Token) => {
+          if (shadowToken.access_token) {
+            localStorage.setItem(broker + '_token', shadowToken.access_token);
           } else {
             localStorage.removeItem(broker + '_token');
           }
         })
-        .map(t => t.access_token);
+        .map((t: Token) => t.access_token);
     })
       .publishReplay(1);
     res.connect();
