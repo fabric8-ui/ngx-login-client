@@ -186,6 +186,17 @@ export class UserService {
   }
 
   /**
+   * Send email verification link to user.
+   */
+  sendEmailVerificationLink(): Observable<any> {
+    return this.http
+      .post(this.usersUrl + '/verificationcode', null, { headers: this.headers })
+      .map(response => {
+        return response;
+      })
+  }
+
+  /**
    * @deprecated since v0.4.4. No replacement is provided.
    *
    */
