@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@angular/core';
-import { Headers, Http } from '@angular/http';
+import { Headers, Http, Response } from '@angular/http';
 
 import {
   Observable,
@@ -182,18 +182,18 @@ export class UserService {
       .get( `${this.usersUrl}?filter[username]=${username}`, { headers: this.headers })
       .map(response => {
         return response.json().data as User[];
-      })
+      });
   }
 
   /**
    * Send email verification link to user.
    */
-  sendEmailVerificationLink(): Observable<any> {
+  sendEmailVerificationLink(): Observable<Response> {
     return this.http
-      .post(this.usersUrl + '/verificationcode', null, { headers: this.headers })
-      .map(response => {
+      .post(this.usersUrl + '/verificationcode', '', { headers: this.headers })
+      .map((response: Response) => {
         return response;
-      })
+      });
   }
 
   /**
