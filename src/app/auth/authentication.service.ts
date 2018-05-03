@@ -95,7 +95,7 @@ export class AuthenticationService {
 
   isOpenShiftConnected(cluster: string): Observable<boolean> {
     let headers = new Headers({ 'Content-Type': 'application/json' });
-    let tokenUrl = this.apiUrl + `token?for=` + cluster;
+    let tokenUrl = this.apiUrl + `token?force_pull=true&for=` + cluster;
     headers.set('Authorization', `Bearer ${this.getToken()}`);
     let options = new RequestOptions({ headers: headers });
     return this.http.get(tokenUrl, options)
