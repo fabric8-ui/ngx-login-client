@@ -46,12 +46,21 @@ export class HttpService extends Http {
 
   private catchRequestError () {
     return (res: Response) => {
-      if (res.status === 403 || ( res.status === 401 && !res.headers.has("www-authenticate"))) {
+      if (res.status === 403 || this.isAuthenticationError(res)) {
         this.broadcaster.broadcast('authenticationError', res);
       } else if (res.status === 500) {
         this.broadcaster.broadcast('communicationError', res);
       }
       return Observable.throw(res);
     };
+  }
+
+  private isAuthenticationError(res: Response): boolean {
+    if (res.status === 401) {
+      const json: any = res.json();
+      return json && Array.isArray(json.errors) &&
+          json.errors.filter((e: any) => e.code === 'jwt_security_error').length >= 1;
+    }
+    return false;
   }
 }
