@@ -64,6 +64,15 @@ describe('Service: User service', () => {
       },
       "id": "secondUserId",
       "type": "userType"
+    },
+    {
+      "attributes": {
+        "fullName": "thirdUser",
+        "imageURL": "",
+        "username": "thirdUser+1@redhat.com"
+      },
+      "id": "thirdUserId",
+      "type": "userType"
     }
   ];
 
@@ -160,6 +169,22 @@ describe('Service: User service', () => {
 
     userService.getUserByUsername('secondUser').subscribe((user) => {
       expect(user.id).toEqual('secondUserId');
+      done();
+    });
+  });
+
+  it('Get user by user name returns valid user when username == email', (done) => {
+    mockService.connections.subscribe((connection: any) => {
+      connection.mockRespond(new Response(
+        new ResponseOptions({
+          body: JSON.stringify({data: testUsers}),
+          status: 201
+        })
+      ));
+    });
+
+    userService.getUserByUsername('thirdUser+1@redhat.com').subscribe((user) => {
+      expect(user.id).toEqual('thirdUserId');
       done();
     });
   });
