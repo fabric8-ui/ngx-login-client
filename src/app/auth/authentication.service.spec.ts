@@ -179,6 +179,31 @@ describe('Service: Authentication service', () => {
     authenticationService.logIn(tokenJson);
   });
 
+  it('Openshift valid connection test if cluster needs to be encoded', (done) => {
+    // given
+    mockService.connections.subscribe((connection: any) => {
+      connection.mockRespond(new Response(
+        new ResponseOptions({
+          body: tokenJson,
+          status: 200
+        })
+      ));
+    });
+    spyOn(authenticationService, 'setupRefreshTimer');
+
+    broadcaster.on('loggedin').subscribe((data: number) => {
+      authenticationService.isOpenShiftConnected('cluster+something-else').subscribe((output) => {
+        // then
+        expect(output).toBe(true);
+        authenticationService.logout();
+        done();
+      });
+    });
+
+    // when
+    authenticationService.logIn(tokenJson);
+  });
+
   it('Openshift failed connection test', (done) => {
     // given
     mockService.connections.subscribe((connection: any) => {
