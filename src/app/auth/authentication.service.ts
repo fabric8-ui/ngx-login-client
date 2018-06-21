@@ -183,7 +183,7 @@ export class AuthenticationService {
       let headers = new Headers({ 'Content-Type': 'application/json' });
       let tokenUrl = this.ssoUrl + `auth/realms/${this.realm}/broker/${broker}/token`;
       if ( broker === this.github ) {
-        tokenUrl = this.apiUrl + `token?for=https://github.com`;
+        tokenUrl = this.apiUrl + `token?for=${encodeURIComponent('https://github.com')}`;
       }
       headers.set('Authorization', `Bearer ${token.access_token}`);
       let options = new RequestOptions({ headers: headers });

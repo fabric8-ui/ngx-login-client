@@ -1,7 +1,7 @@
 
 import { async, inject, TestBed } from '@angular/core/testing';
 import { BaseRequestOptions, Http, Response, ResponseOptions } from '@angular/http';
-import { MockBackend } from '@angular/http/testing';
+import { MockBackend, MockConnection } from '@angular/http/testing';
 
 import { Broadcaster } from 'ngx-base';
 
@@ -30,11 +30,11 @@ describe('Service: Authentication service', () => {
         },
         {
           provide: AUTH_API_URL,
-          useValue: "http://example.com"
+          useValue: 'http://example.com/'
         },
         {
           provide: REALM,
-          useValue: "fabric8"
+          useValue: 'fabric8'
         },
         {
           provide: SSO_API_URL,
@@ -58,7 +58,9 @@ describe('Service: Authentication service', () => {
     authenticationService.logout();
   });
 
-  let tokenJson = `{"access_token":"token","expires_in":1800,"refresh_expires_in":1800,"refresh_token":"refresh","token_type":"bearer"}`;
+  let tokenJson = `
+    {"access_token":"token","expires_in":1800,"refresh_expires_in":1800,"refresh_token":"refresh","token_type":"bearer"}
+  `;
 
   it('Can log on', (done) => {
     spyOn(authenticationService, 'setupRefreshTimer');
@@ -106,7 +108,7 @@ describe('Service: Authentication service', () => {
   });
 
   it('Refresh token processing', (done) => {
-    mockService.connections.subscribe((connection: any) => {
+    mockService.connections.subscribe((connection: MockConnection) => {
       connection.mockRespond(new Response(
         new ResponseOptions({
           body: JSON.stringify({token: tokenJson}),
@@ -130,7 +132,7 @@ describe('Service: Authentication service', () => {
 
   it('Openshift proxy token retrieval', (done) => {
     // given
-    mockService.connections.subscribe((connection: any) => {
+    mockService.connections.subscribe((connection: MockConnection) => {
       connection.mockRespond(new Response(
         new ResponseOptions({
           body: tokenJson,
@@ -144,7 +146,7 @@ describe('Service: Authentication service', () => {
       let token = JSON.parse(tokenJson);
       authenticationService.getOpenShiftToken().subscribe(output => {
         // then
-        expect(output == authenticationService.getToken());
+        expect(output === authenticationService.getToken());
         authenticationService.logout();
         done();
       });
@@ -156,7 +158,7 @@ describe('Service: Authentication service', () => {
 
   it('Openshift valid connection test', (done) => {
     // given
-    mockService.connections.subscribe((connection: any) => {
+    mockService.connections.subscribe((connection: MockConnection) => {
       connection.mockRespond(new Response(
         new ResponseOptions({
           body: tokenJson,
@@ -181,7 +183,9 @@ describe('Service: Authentication service', () => {
 
   it('Openshift valid connection test if cluster needs to be encoded', (done) => {
     // given
-    mockService.connections.subscribe((connection: any) => {
+    mockService.connections.subscribe((connection: MockConnection) => {
+      const url = connection.request.url;
+      expect(url !== decodeURIComponent(url)).toBe(true);
       connection.mockRespond(new Response(
         new ResponseOptions({
           body: tokenJson,
@@ -232,7 +236,7 @@ describe('Service: Authentication service', () => {
 
   it('Github token processing', (done) => {
     // given
-    mockService.connections.subscribe((connection: any) => {
+    mockService.connections.subscribe((connection: MockConnection) => {
       connection.mockRespond(new Response(
         new ResponseOptions({
           body: tokenJson,
@@ -246,7 +250,7 @@ describe('Service: Authentication service', () => {
       let token = JSON.parse(tokenJson);
       authenticationService.gitHubToken.subscribe(output => {
         // then
-        expect(output == token.access_token);
+        expect(output === token.access_token);
         expect(localStorage.getItem('github_token')).toBe(token.access_token);
         authenticationService.logout();
         done();
@@ -258,7 +262,7 @@ describe('Service: Authentication service', () => {
 
   it('Github token clear', (done) => {
     // given
-    mockService.connections.subscribe((connection: any) => {
+    mockService.connections.subscribe((connection: MockConnection) => {
       connection.mockRespond(new Response(
         new ResponseOptions({
           body: tokenJson,
@@ -286,7 +290,7 @@ describe('Service: Authentication service', () => {
 
   it('Github token processing', (done) => {
     // given
-    mockService.connections.subscribe((connection: any) => {
+    mockService.connections.subscribe((connection: MockConnection) => {
       connection.mockRespond(new Response(
         new ResponseOptions({
           body: tokenJson,

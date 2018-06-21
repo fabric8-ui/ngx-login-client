@@ -1,6 +1,6 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { BaseRequestOptions, Http, Response, ResponseOptions } from '@angular/http';
-import { MockBackend } from '@angular/http/testing';
+import { MockBackend, MockConnection } from '@angular/http/testing';
 
 import { Broadcaster, Logger } from 'ngx-base';
 
@@ -27,7 +27,7 @@ describe('Service: User service', () => {
         },
         {
           provide: AUTH_API_URL,
-          useValue: "http://example.com"
+          useValue: 'http://example.com'
         },
         Broadcaster,
         Logger
@@ -77,7 +77,7 @@ describe('Service: User service', () => {
   ];
 
   it('Logged in event updates user', (done) => {
-    mockService.connections.subscribe((connection: any) => {
+    mockService.connections.subscribe((connection: MockConnection) => {
       connection.mockRespond(new Response(
         new ResponseOptions({
           body: JSON.stringify({data: testUser}),
@@ -97,7 +97,7 @@ describe('Service: User service', () => {
   });
 
   it('Logged out event clears user', (done) => {
-    mockService.connections.subscribe((connection: any) => {
+    mockService.connections.subscribe((connection: MockConnection) => {
       connection.mockRespond(new Response(
         new ResponseOptions({
           body: JSON.stringify({data: testUser}),
@@ -123,7 +123,7 @@ describe('Service: User service', () => {
   });
 
   it('Get user by user id returns valid user', (done) => {
-    mockService.connections.subscribe((connection: any) => {
+    mockService.connections.subscribe((connection: MockConnection) => {
       connection.mockRespond(new Response(
         new ResponseOptions({
           body: JSON.stringify({data: testUser}),
@@ -142,7 +142,7 @@ describe('Service: User service', () => {
   });
 
   it('Get user by user name returns null no user matched', (done) => {
-    mockService.connections.subscribe((connection: any) => {
+    mockService.connections.subscribe((connection: MockConnection) => {
       connection.mockRespond(new Response(
         new ResponseOptions({
           body: JSON.stringify({data: testUsers}),
@@ -158,7 +158,7 @@ describe('Service: User service', () => {
   });
 
   it('Get user by user name returns valid user', (done) => {
-    mockService.connections.subscribe((connection: any) => {
+    mockService.connections.subscribe((connection: MockConnection) => {
       connection.mockRespond(new Response(
         new ResponseOptions({
           body: JSON.stringify({data: testUsers}),
@@ -174,7 +174,9 @@ describe('Service: User service', () => {
   });
 
   it('Get user by user name returns valid user when username == email', (done) => {
-    mockService.connections.subscribe((connection: any) => {
+    mockService.connections.subscribe((connection: MockConnection) => {
+      const url = connection.request.url;
+      expect(url !== decodeURIComponent(url)).toBe(true);
       connection.mockRespond(new Response(
         new ResponseOptions({
           body: JSON.stringify({data: testUsers}),
