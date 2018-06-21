@@ -95,7 +95,7 @@ export class AuthenticationService {
 
   isOpenShiftConnected(cluster: string): Observable<boolean> {
     let headers = new Headers({ 'Content-Type': 'application/json' });
-    let tokenUrl = this.apiUrl + `token?force_pull=true&for=` + cluster;
+    let tokenUrl = this.apiUrl + `token?force_pull=true&for=` + encodeURIComponent(cluster);
     headers.set('Authorization', `Bearer ${this.getToken()}`);
     let options = new RequestOptions({ headers: headers });
     return this.http.get(tokenUrl, options)
@@ -183,7 +183,7 @@ export class AuthenticationService {
       let headers = new Headers({ 'Content-Type': 'application/json' });
       let tokenUrl = this.ssoUrl + `auth/realms/${this.realm}/broker/${broker}/token`;
       if ( broker === this.github ) {
-        tokenUrl = this.apiUrl + `token?for=https://github.com`;
+        tokenUrl = this.apiUrl + `token?for=${encodeURIComponent('https://github.com')}`;
       }
       headers.set('Authorization', `Bearer ${token.access_token}`);
       let options = new RequestOptions({ headers: headers });
