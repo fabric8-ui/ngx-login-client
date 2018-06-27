@@ -42,17 +42,15 @@ export class HttpService extends Http {
         url.headers.set('Authorization', `Bearer ${token}`);
       }
     }
-    return super.request(url, options).catch(this.catchRequestError());
+    return super.request(url, options).catch(this.catchRequestError);
   }
 
-  private catchRequestError () {
-    return (res: Response) => {
-      if (res.status === 403 || isAuthenticationError(res)) {
-        this.broadcaster.broadcast('authenticationError', res);
-      } else if (res.status === 500) {
-        this.broadcaster.broadcast('communicationError', res);
-      }
-      return Observable.throw(res);
-    };
+  private catchRequestError = (res: Response) => {
+    if (res.status === 403 || isAuthenticationError(res)) {
+      this.broadcaster.broadcast('authenticationError', res);
+    } else if (res.status === 500) {
+      this.broadcaster.broadcast('communicationError', res);
+    }
+    return Observable.throw(res);
   }
 }

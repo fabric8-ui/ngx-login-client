@@ -102,7 +102,7 @@ export class UserService {
       .map(response => {
         return response.json().data as User;
       })
-      .catch(this.catchRequestError());
+      .catch(this.catchRequestError);
   }
 
   /**
@@ -130,7 +130,7 @@ export class UserService {
         .map(response => {
           return response.json().data as User[];
         })
-        .catch(this.catchRequestError());
+        .catch(this.catchRequestError);
     }
     return Observable.of([] as User[]);
   }
@@ -171,7 +171,7 @@ export class UserService {
       .map(response => {
         return response.json().data as User[];
       })
-      .catch(this.catchRequestError())
+      .catch(this.catchRequestError)
       // TODO remove this
       .do(val => this.allUserData = val);
   }
@@ -189,7 +189,7 @@ export class UserService {
       .map(response => {
         return response.json().data as User[];
       })
-      .catch(this.catchRequestError());
+      .catch(this.catchRequestError);
   }
 
   /**
@@ -201,7 +201,7 @@ export class UserService {
       .map((response: Response) => {
         return response;
       })
-      .catch(this.catchRequestError());
+      .catch(this.catchRequestError);
   }
 
   /**
@@ -212,12 +212,10 @@ export class UserService {
     this.userData = {} as User;
   }
 
-  private catchRequestError() {
-    return (response: Response) => {
-      if (isAuthenticationError(response)) {
-        this.broadcaster.broadcast('authenticationError', response);
-      }
-      return Observable.throw(response);
-    };
+  private catchRequestError = (response: Response) => {
+    if (isAuthenticationError(response)) {
+      this.broadcaster.broadcast('authenticationError', response);
+    }
+    return Observable.throw(response);
   }
 }
