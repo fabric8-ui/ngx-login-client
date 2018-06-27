@@ -8,6 +8,7 @@ import { AUTH_API_URL } from '../shared/auth-api';
 import { SSO_API_URL } from '../shared/sso-api';
 import { REALM } from '../shared/realm-token';
 import { Token } from '../user/token';
+import { isAuthenticationError } from '../shared/check-auth-error';
 
 export interface ProcessTokenResponse {
   (response: Response): Token;
@@ -149,7 +150,7 @@ export class AuthenticationService {
         })
         .catch(response => {
           // Additionally catch a 400 from keycloak
-          if (response.status === 400) {
+          if (response.status === 400 || isAuthenticationError(response)) {
             this.broadcaster.broadcast('authenticationError', response);
           }
           return Observable.of({} as Token);
@@ -190,6 +191,9 @@ export class AuthenticationService {
       return this.http.get(tokenUrl, options)
         .map(response => processToken(response))
         .catch(response => {
+          if (isAuthenticationError(response)) {
+            this.broadcaster.broadcast('authenticationError', response);
+          }
           if (response.status === 400) {
             this.broadcaster.broadcast('noFederatedToken', res);
           }

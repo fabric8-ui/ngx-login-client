@@ -45,34 +45,34 @@ describe('Service: User service', () => {
   ));
 
   let testUser = {
-    "attributes": {
-      "fullName": "name",
-      "imageURL": "",
-      "username": "myUser"
+    'attributes': {
+      'fullName': 'name',
+      'imageURL': '',
+      'username': 'myUser'
     },
-    "id": "userId",
-    "type": "userType"
+    'id': 'userId',
+    'type': 'userType'
   };
 
   let testUsers = [
     testUser,
     {
-      "attributes": {
-        "fullName": "secondUser",
-        "imageURL": "",
-        "username": "secondUser"
+      'attributes': {
+        'fullName': 'secondUser',
+        'imageURL': '',
+        'username': 'secondUser'
       },
-      "id": "secondUserId",
-      "type": "userType"
+      'id': 'secondUserId',
+      'type': 'userType'
     },
     {
-      "attributes": {
-        "fullName": "thirdUser",
-        "imageURL": "",
-        "username": "thirdUser+1@redhat.com"
+      'attributes': {
+        'fullName': 'thirdUser',
+        'imageURL': '',
+        'username': 'thirdUser+1@redhat.com'
       },
-      "id": "thirdUserId",
-      "type": "userType"
+      'id': 'thirdUserId',
+      'type': 'userType'
     }
   ];
 

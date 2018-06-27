@@ -12,6 +12,7 @@ import { cloneDeep } from 'lodash';
 import { Broadcaster, Logger } from 'ngx-base';
 
 import { AUTH_API_URL } from '../shared/auth-api';
+import { isAuthenticationError } from '../shared/check-auth-error';
 import { User } from './user';
 
 /**
@@ -22,7 +23,6 @@ import { User } from './user';
  */
 @Injectable()
 export class UserService {
-
   /**
    * The currently logged in user - please use currentLoggedInUser instead of subscribing
    * TODO: move this to deprecated
@@ -33,6 +33,8 @@ export class UserService {
    * The current logged in user - should be always populated after login
    */
   public currentLoggedInUser: User = {} as User;
+
+  private broadcaster: Broadcaster;
 
   /**
    * @deprecated since v0.4.4. Use {@link #loggedInUser} instead.
@@ -48,6 +50,7 @@ export class UserService {
   private userUrl: string;  // URL to web api
   private usersUrl: string;  // URL to web api
   private searchUrl: string;
+
 
   constructor(private http: Http,
     private logger: Logger,
@@ -98,7 +101,8 @@ export class UserService {
       .get(`${this.usersUrl}/${encodeURIComponent(userId)}`, { headers: this.headers })
       .map(response => {
         return response.json().data as User;
-      });
+      })
+      .catch(this.catchRequestError());
   }
 
   /**
@@ -120,12 +124,13 @@ export class UserService {
    * Get users by a search string
    */
   getUsersBySearchString(search: string): Observable<User[]> {
-    if (search && search !== "") {
+    if (search && search !== '') {
       return this.http
         .get(this.searchUrl + '/users?q=' + encodeURIComponent(search), {headers: this.headers})
         .map(response => {
           return response.json().data as User[];
-        });
+        })
+        .catch(this.catchRequestError());
     }
     return Observable.of([] as User[]);
   }
@@ -166,6 +171,7 @@ export class UserService {
       .map(response => {
         return response.json().data as User[];
       })
+      .catch(this.catchRequestError())
       // TODO remove this
       .do(val => this.allUserData = val);
   }
@@ -182,7 +188,8 @@ export class UserService {
       .get( `${this.usersUrl}?filter[username]=${encodeURIComponent(username)}`, { headers: this.headers })
       .map(response => {
         return response.json().data as User[];
-      });
+      })
+      .catch(this.catchRequestError());
   }
 
   /**
@@ -193,7 +200,8 @@ export class UserService {
       .post(this.usersUrl + '/verificationcode', '', { headers: this.headers })
       .map((response: Response) => {
         return response;
-      });
+      })
+      .catch(this.catchRequestError());
   }
 
   /**
@@ -202,5 +210,14 @@ export class UserService {
    */
   resetUser(): void {
     this.userData = {} as User;
+  }
+
+  private catchRequestError() {
+    return (response: Response) => {
+      if (isAuthenticationError(response)) {
+        this.broadcaster.broadcast('authenticationError', response);
+      }
+      return Observable.throw(response);
+    };
   }
 }

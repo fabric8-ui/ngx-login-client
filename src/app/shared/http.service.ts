@@ -15,6 +15,7 @@ import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/of';
 
 import { Broadcaster } from 'ngx-base';
+import { isAuthenticationError } from './check-auth-error';
 
 @Injectable()
 export class HttpService extends Http {
@@ -46,21 +47,12 @@ export class HttpService extends Http {
 
   private catchRequestError () {
     return (res: Response) => {
-      if (res.status === 403 || this.isAuthenticationError(res)) {
+      if (res.status === 403 || isAuthenticationError(res)) {
         this.broadcaster.broadcast('authenticationError', res);
       } else if (res.status === 500) {
         this.broadcaster.broadcast('communicationError', res);
       }
       return Observable.throw(res);
     };
-  }
-
-  private isAuthenticationError(res: Response): boolean {
-    if (res.status === 401) {
-      const json: any = res.json();
-      return json && Array.isArray(json.errors) &&
-          json.errors.filter((e: any) => e.code === 'jwt_security_error').length >= 1;
-    }
-    return false;
   }
 }
