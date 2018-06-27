@@ -34,7 +34,6 @@ export class UserService {
    */
   public currentLoggedInUser: User = {} as User;
 
-  private broadcaster: Broadcaster;
 
   /**
    * @deprecated since v0.4.4. Use {@link #loggedInUser} instead.
@@ -54,7 +53,7 @@ export class UserService {
 
   constructor(private http: Http,
     private logger: Logger,
-    broadcaster: Broadcaster,
+    private broadcaster: Broadcaster,
     @Inject(AUTH_API_URL) apiUrl: string
   ) {
     this.userUrl = apiUrl + 'user';
