@@ -200,8 +200,7 @@ export class UserService {
       .post(this.usersUrl + '/verificationcode', '', { headers: this.headers })
       .map((response: Response) => {
         return response;
-      })
-      .catch(this.catchRequestError);
+      });
   }
 
   /**
