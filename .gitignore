@@ -66,3 +66,5 @@ npm-debug.log
 .vscode/
 
 *.ngsummary.json
+
+package-lock.json
