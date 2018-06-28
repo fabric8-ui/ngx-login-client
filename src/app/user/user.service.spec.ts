@@ -1,5 +1,5 @@
 import { inject, TestBed } from '@angular/core/testing';
-import { BaseRequestOptions, Http, Response, ResponseOptions } from '@angular/http';
+import { BaseRequestOptions, Http, Response, ResponseOptions, Headers } from '@angular/http';
 import { MockBackend, MockConnection } from '@angular/http/testing';
 
 import { Broadcaster, Logger } from 'ngx-base';
@@ -76,6 +76,8 @@ describe('Service: User service', () => {
     }
   ];
 
+  const mockHeader = new Headers({'Www-Authenticate': 'LOGIN url=something.io login required'});
+
   it('Logged in event updates user', (done) => {
     mockService.connections.subscribe((connection: MockConnection) => {
       connection.mockRespond(new Response(
@@ -141,6 +143,36 @@ describe('Service: User service', () => {
     broadcaster.broadcast('loggedin', 1);
   });
 
+
+  it('Get user by user id should broadcast authenticationError event on 401 with auth header', (done) => {
+    let authenticationError = false;
+    let errored = false;
+    broadcaster.on('authenticationError').subscribe(() => {
+      authenticationError = true;
+    });
+
+    mockService.connections.subscribe((connection: any) => {
+      connection.mockError(new Response(
+        new ResponseOptions({
+          body: JSON.stringify({errors: [{code: 'validation_error'}]}),
+          headers: mockHeader,
+          status: 401
+        })
+      ));
+    });
+
+    broadcaster.on('loggedin').subscribe((data: number) => {
+      userService.getUserByUserId('userId').subscribe(() => {}, () => {
+        errored = true;
+      });
+      expect(errored).toBe(true, 'request error');
+      expect(authenticationError).toBe(true, 'authentication error');
+      done();
+    });
+    broadcaster.broadcast('loggedin', 1);
+  });
+
+
   it('Get user by user name returns null no user matched', (done) => {
     mockService.connections.subscribe((connection: MockConnection) => {
       connection.mockRespond(new Response(
@@ -190,5 +222,32 @@ describe('Service: User service', () => {
       done();
     });
   });
-});
 
+  it('Get user by username should broadcast authenticationError event on 401 with auth header', (done) => {
+    let authenticationError = false;
+    let errored = false;
+    broadcaster.on('authenticationError').subscribe(() => {
+      authenticationError = true;
+    });
+
+    mockService.connections.subscribe((connection: any) => {
+      connection.mockError(new Response(
+        new ResponseOptions({
+          body: JSON.stringify({errors: [{code: 'validation_error'}]}),
+          headers: mockHeader,
+          status: 401
+        })
+      ));
+    });
+
+    broadcaster.on('loggedin').subscribe((data: number) => {
+      userService.getUserByUserId('secondUser').subscribe(() => {}, () => {
+        errored = true;
+      });
+      expect(errored).toBe(true, 'request error');
+      expect(authenticationError).toBe(true, 'authentication error');
+      done();
+    });
+    broadcaster.broadcast('loggedin', 1);
+  });
+});

@@ -1,6 +1,6 @@
 
 import { async, inject, TestBed } from '@angular/core/testing';
-import { BaseRequestOptions, Http, Response, ResponseOptions } from '@angular/http';
+import { BaseRequestOptions, Http, Response, ResponseOptions, Headers } from '@angular/http';
 import { MockBackend, MockConnection } from '@angular/http/testing';
 
 import { Broadcaster } from 'ngx-base';
@@ -61,6 +61,8 @@ describe('Service: Authentication service', () => {
   let tokenJson = `
     {"access_token":"token","expires_in":1800,"refresh_expires_in":1800,"refresh_token":"refresh","token_type":"bearer"}
   `;
+
+   const mockHeader = new Headers({'Www-Authenticate': 'LOGIN url=something.io login required'});
 
   it('Can log on', (done) => {
     spyOn(authenticationService, 'setupRefreshTimer');
@@ -129,6 +131,33 @@ describe('Service: Authentication service', () => {
 
     authenticationService.logIn(tokenJson);
   });
+
+  it('Refresh token should broadcast authenticationError event on 401 with auth header www-authenticate', (done) => {
+    let authenticationError = false;
+    broadcaster.on('authenticationError').subscribe(() => {
+      authenticationError = true;
+    });
+
+    mockService.connections.subscribe((connection: any) => {
+      connection.mockError(new Response(
+        new ResponseOptions({
+          body: JSON.stringify({errors: [{code: 'validation_error'}]}),
+          headers: mockHeader,
+          status: 401
+        })
+      ));
+    });
+
+
+    broadcaster.on('loggedin').subscribe((data: number) => {
+      authenticationService.refreshToken();
+      expect(authenticationError).toBe(true, 'authentication error');
+      done();
+    });
+
+    authenticationService.logIn(tokenJson);
+  });
+
 
   it('Openshift proxy token retrieval', (done) => {
     // given

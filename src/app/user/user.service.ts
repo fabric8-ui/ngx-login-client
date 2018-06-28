@@ -34,7 +34,10 @@ export class UserService {
    */
   public currentLoggedInUser: User = {} as User;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix(auth): added tests for authentication.service and user.service handling catchRequestErrors
   /**
    * @deprecated since v0.4.4. Use {@link #loggedInUser} instead.
    */
