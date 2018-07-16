@@ -9,14 +9,15 @@ import {
   XHRBackend
 } from '@angular/http';
 
-import { Observable} from 'rxjs/Observable';
-import 'rxjs/operators/map';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/observable/of';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 
 import { Broadcaster } from 'ngx-base';
 import { isAuthenticationError } from './check-auth-error';
 
+/**
+ * @deprecated
+ */
 @Injectable()
 export class HttpService extends Http {
   private broadcaster: Broadcaster;
@@ -42,7 +43,7 @@ export class HttpService extends Http {
         url.headers.set('Authorization', `Bearer ${token}`);
       }
     }
-    return super.request(url, options).catch(this.catchRequestError);
+    return super.request(url, options).pipe(catchError(this.catchRequestError));
   }
 
   private catchRequestError = (res: Response) => {
@@ -51,6 +52,6 @@ export class HttpService extends Http {
     } else if (res.status === 500) {
       this.broadcaster.broadcast('communicationError', res);
     }
-    return Observable.throw(res);
+    return throwError(res);
   }
 }
