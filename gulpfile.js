@@ -1,13 +1,9 @@
 
 const gulp = require('gulp'),
   autoprefixer = require('autoprefixer'),
-  LessAutoprefix = require('less-plugin-autoprefix'),
-  autoprefix = new LessAutoprefix({ browsers: ['last 2 versions'] }),
   changed = require('gulp-changed'),
-  cssmin = require('gulp-cssmin'),
   del = require('del'),
   exec = require('child_process').exec,
-  lessCompiler = require('gulp-less'),
   ngc = require('gulp-ngc'),
   path = require('path'),
   postcss = require('postcss'),
@@ -40,29 +36,6 @@ function updateWatchDist() {
     .pipe(gulp.dest(watchDist));
 }
 
-function transpileLESS(src) {
-  return gulp.src(src)
-    .pipe(sourcemaps.init())
-    .pipe(lessCompiler({
-      paths: [ path.join(__dirname, 'less', 'includes') ]
-    }))
-    .pipe(cssmin().on('error', function(err) {
-      console.error(err);
-    }))
-    .pipe(sourcemaps.write())
-    .pipe(gulp.dest('./dist/src/'));
-}
-
-function minifyCSS(file) {
-  try {
-    let minifiedFile = stylus.render(file);
-    minifiedFile = postcss([autoprefixer]).process(minifiedFile).css;
-    minifiedFile = csso.minify(minifiedFile).css;
-    return minifiedFile;
-  } catch (err) {
-    console.error(err);
-  }
-}
 /**
  * TASKS
  */
@@ -70,36 +43,18 @@ function minifyCSS(file) {
 // Put the LESS files back to normal
 gulp.task('build-library',
   [
-    'lint-less',
-    'transpile-less',
     'transpile',
     'post-transpile',
-    'copy-css',
-    'copy-html',
     'copy-static-assets'
   ]);
 
-// stylelint
-gulp.task('lint-less', function lintLessTask() {
-  const gulpStylelint = require ('gulp-stylelint');
+gulp.task('transpile', function () {
+  // Stick with v0.2.1 due to "function calls are not supported in decorators" issue
+  // See: https://github.com/angular/angular/issues/23609
+  // See: https://github.com/dherges/ng-packagr/issues/727
 
-  return gulp
-  .src('src/**/*.less')
-  .pipe(gulpStylelint({
-    failAfterError: true,
-    reporters: [
-    {formatter: 'string', console: true}
-    ]
-  }));
-});
-
-// Less compilation - requires linting to complete before it will start
-gulp.task('transpile-less', ['lint-less'], function () {
-  return transpileLESS(appSrc + '/**/*.less');
-});
-
-// require transpile-less to finish before starting the transpile process
-gulp.task('transpile', ['transpile-less'], function () {
+  // Change for v0.3.0 https://github.com/filipesilva/angular-quickstart-lib/issues/61
+  // return ngc(['--project', 'tsconfig.json']);
   return ngc('tsconfig.json')
 });
 
@@ -107,26 +62,9 @@ gulp.task('transpile', ['transpile-less'], function () {
 gulp.task('post-transpile', ['transpile'], function () {
   return gulp.src(['dist/src/app/**/*.js'])
     .pipe(replace(/templateUrl:\s/g, "template: require("))
-    .pipe(replace(/\.html',/g, ".html'),"))
-    .pipe(replace(/\.html'/g, ".html')"))
-    .pipe(replace(/styleUrls: \[/g, "styles: [require("))
-    .pipe(replace(/\.less']/g, ".css').toString()]"))
     .pipe(gulp.dest(function (file) {
       return file.base; // because of Angular's encapsulation, it's natural to save the css where the less-file was
     }));
-});
-
-// require transpile to finish before copying the css
-gulp.task('copy-css', ['transpile'], function () {
-  return copyToDist([
-    'src/**/*.css'
-  ]);
-});
-
-gulp.task('copy-html', function () {
-  return copyToDist([
-    'src/**/*.html'
-  ]);
 });
 
 gulp.task('copy-static-assets', function () {
@@ -149,16 +87,6 @@ gulp.task('copy-watch-all', ['build-library'], function() {
 gulp.task('watch', ['build-library', 'copy-watch-all'], function () {
   gulp.watch([appSrc + '/app/**/*.ts', '!' + appSrc + '/app/**/*.spec.ts'], ['transpile', 'post-transpile', 'copy-watch']).on('change', function (e) {
     util.log(util.colors.cyan(e.path) + ' has been changed. Compiling.');
-  });
-  gulp.watch([appSrc + '/app/**/*.less'], ['transpile-less']).on('change', function (e) {
-    util.log(util.colors.cyan(e.path) + ' has been changed. Updating.');
-    transpileLESS(e.path);
-    updateWatchDist();
-  });
-  gulp.watch([appSrc + '/app/**/*.html']).on('change', function (e) {
-    util.log(util.colors.cyan(e.path) + ' has been changed. Updating.');
-    copyToDist(e.path);
-    updateWatchDist();
   });
   util.log('Now run');
   util.log('');
