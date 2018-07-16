@@ -4,9 +4,12 @@ import { Headers, Http, Response } from '@angular/http';
 import {
   Observable,
   ConnectableObservable,
+  merge,
+  of,
   ReplaySubject,
   Subject
 } from 'rxjs';
+import { catchError, map, multicast, publishReplay, switchMap, tap } from 'rxjs/operators';
 
 import { cloneDeep } from 'lodash';
 import { Broadcaster, Logger } from 'ngx-base';
@@ -60,33 +63,33 @@ export class UserService {
     this.searchUrl = apiUrl + 'search';
     // TODO - switch to internal observable that is populated on initialization
     // and only expose currentLoggedInUser publicly
-    this.loggedInUser = Observable.merge(
+    this.loggedInUser = merge(
       broadcaster.on('loggedin')
-        .map(val => 'loggedIn'),
+        .pipe(map((val: any) => 'loggedIn')),
       broadcaster.on('logout')
-        .map(val => 'loggedOut'),
+        .pipe(map((val: any) => 'loggedOut')),
       broadcaster.on('authenticationError')
-        .map(val => 'authenticationError')
-    )
-      .switchMap(val => {
+        .pipe(map((val: any) => 'authenticationError'))
+    ).pipe(
+      switchMap((val: any) => {
         // If it's a login event, then we need to retreive the user's details
         if (val === 'loggedIn') {
-          return this.http
-            .get(this.userUrl, { headers: this.headers })
-            .map(response => cloneDeep(response.json().data as User));
+          return this.http.get(this.userUrl, { headers: this.headers })
+            .pipe(map(response => cloneDeep(response.json().data as User)));
         } else {
           // Otherwise, we clear the user
-          return Observable.of({} as User);
+          return of({} as User);
         }
-      })
-      .do(user => {
+      }),
+      tap((user: any) => {
         this.currentLoggedInUser = user;
         // TODO remove this - ensure nobody is using userData anymore
         this.userData = user;
-      })
+      }),
       // In order to ensure any future subscribers get the currently user
       // we use a replay subject of size 1
-      .multicast(() => new ReplaySubject(1));
+      multicast(() => new ReplaySubject(1))
+    ) as ConnectableObservable<User>;
       this.loggedInUser.connect();
   }
 
@@ -97,10 +100,12 @@ export class UserService {
   getUserByUserId(userId: string): Observable<User> {
     return this.http
       .get(`${this.usersUrl}/${encodeURIComponent(userId)}`, { headers: this.headers })
-      .map(response => {
-        return response.json().data as User;
-      })
-      .catch(this.catchRequestError);
+      .pipe(
+        map(response => {
+          return response.json().data as User;
+        }),
+        catchError(this.catchRequestError)
+      );
   }
 
   /**
@@ -108,14 +113,14 @@ export class UserService {
    * @param username the username to search for
    */
   getUserByUsername(username: string): Observable<User> {
-    return this.filterUsersByUsername(username).map(val => {
+    return this.filterUsersByUsername(username).pipe(map(val => {
       for (let u of val) {
         if (username === u.attributes.username) {
           return u;
         }
       }
       return null;
-    });
+    }));
   }
 
   /**
@@ -125,12 +130,14 @@ export class UserService {
     if (search && search !== '') {
       return this.http
         .get(this.searchUrl + '/users?q=' + encodeURIComponent(search), {headers: this.headers})
-        .map(response => {
-          return response.json().data as User[];
-        })
-        .catch(this.catchRequestError);
+        .pipe(
+          map(response => {
+            return response.json().data as User[];
+          }),
+          catchError(this.catchRequestError)
+        );
     }
-    return Observable.of([] as User[]);
+    return of([] as User[]);
   }
 
   /**
@@ -166,12 +173,14 @@ export class UserService {
   getAllUsers(): Observable<User[]> {
     return this.http
       .get(this.usersUrl, { headers: this.headers })
-      .map(response => {
+      .pipe(
+        map(response => {
         return response.json().data as User[];
-      })
-      .catch(this.catchRequestError)
+      }),
+      catchError(this.catchRequestError),
       // TODO remove this
-      .do(val => this.allUserData = val);
+      tap(val => this.allUserData = val)
+      );
   }
 
   /**
@@ -184,10 +193,12 @@ export class UserService {
   filterUsersByUsername(username: string): Observable<User[]> {
     return this.http
       .get( `${this.usersUrl}?filter[username]=${encodeURIComponent(username)}`, { headers: this.headers })
-      .map(response => {
-        return response.json().data as User[];
-      })
-      .catch(this.catchRequestError);
+      .pipe(
+        map(response => {
+          return response.json().data as User[];
+        }),
+        catchError(this.catchRequestError)
+      );
   }
 
   /**
@@ -196,9 +207,9 @@ export class UserService {
   sendEmailVerificationLink(): Observable<Response> {
     return this.http
       .post(this.usersUrl + '/verificationcode', '', { headers: this.headers })
-      .map((response: Response) => {
+      .pipe(map((response: Response) => {
         return response;
-      });
+      }));
   }
 
   /**
