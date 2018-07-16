@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
+
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
 // App components
 import { AppComponent } from './app.component';
@@ -16,7 +16,7 @@ import { AuthInterceptor } from './shared/auth.interceptor';
     AppRoutingModule,
     BrowserModule,
     FormsModule,
-    HttpModule
+    HttpClientModule
   ],
   declarations: [
     AppComponent
