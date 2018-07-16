@@ -32,7 +32,7 @@ There are several services and a couple of models used by them available.
     LoggerService
   
 You must provide the URL to API to do the login. To do this, you must provide 
-a `string` with an OpaqueToken `AUTH_API_URL` from `ngx-login-client`. We suggest using a
+a `string` with an InjectionToken `AUTH_API_URL` from `ngx-login-client`. We suggest using a
 factory provider for this. For example:
 
 ````
