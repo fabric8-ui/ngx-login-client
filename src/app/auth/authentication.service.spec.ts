@@ -1,7 +1,7 @@
 
 import { async, inject, TestBed } from '@angular/core/testing';
-import { BaseRequestOptions, Http, Response, ResponseOptions, Headers } from '@angular/http';
-import { MockBackend, MockConnection } from '@angular/http/testing';
+import { HttpClient, HttpResponse, HttpHeaders } from '@angular/common/http';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
 import { Broadcaster } from 'ngx-base';
 
@@ -12,22 +12,20 @@ import { REALM } from '../shared/realm-token';
 
 describe('Service: Authentication service', () => {
 
-  let mockService: MockBackend;
+  const authUrl: string = 'http://example.com/';
   let authenticationService: AuthenticationService;
   let broadcaster: Broadcaster;
+  let httpClient: HttpClient;
+  let httpClientTestingModule: HttpClientTestingModule;
+  let httpTestingController: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [
+        HttpClientTestingModule
+      ],
       providers: [
-        BaseRequestOptions,
         AuthenticationService,
-        MockBackend,
-        {
-          provide: Http,
-          useFactory: (backend: MockBackend,
-                       options: BaseRequestOptions) => new Http(backend, options),
-          deps: [MockBackend, BaseRequestOptions]
-        },
         {
           provide: AUTH_API_URL,
           useValue: 'http://example.com/'
@@ -46,15 +44,19 @@ describe('Service: Authentication service', () => {
   });
 
   beforeEach(inject(
-    [AuthenticationService, MockBackend, Broadcaster],
-    (service: AuthenticationService, mock: MockBackend, broadcast: Broadcaster) => {
+    [AuthenticationService, Broadcaster],
+    (service: AuthenticationService, broadcast: Broadcaster) => {
       authenticationService = service;
-      mockService = mock;
+      httpClient = TestBed.get(HttpClient);
+      httpTestingController = TestBed.get(HttpTestingController);
       broadcaster = broadcast;
     }
   ));
 
   afterEach(() => {
+    // After every test, assert that there are no more pending requests.
+    // httpTestingController.verify();
+    // Logout so you can have a fresh start on each test.
     authenticationService.logout();
   });
 
@@ -62,9 +64,11 @@ describe('Service: Authentication service', () => {
     {"access_token":"token","expires_in":1800,"refresh_expires_in":1800,"refresh_token":"refresh","token_type":"bearer"}
   `;
 
-   const mockHeader = new Headers({'Www-Authenticate': 'LOGIN url=something.io login required'});
+  const authHeader = {
+    'Www-Authenticate': 'LOGIN url=something.io login required'
+  };
 
-  it('Can log on', (done) => {
+  it('can log on', (done) => {
     spyOn(authenticationService, 'setupRefreshTimer');
 
     broadcaster.on('loggedin').subscribe((data: number) => {
@@ -78,10 +82,10 @@ describe('Service: Authentication service', () => {
     authenticationService.logIn(tokenJson);
   });
 
-  it('Retrieves token', (done) => {
+  it('can retrieve the token', (done) => {
     spyOn(authenticationService, 'setupRefreshTimer');
 
-    broadcaster.on('loggedin').subscribe((data: number) => {
+    broadcaster.on('loggedin').subscribe(() => {
       let token = JSON.parse(tokenJson);
       expect(authenticationService.getToken()).toBe(token.access_token);
       done();
@@ -89,7 +93,7 @@ describe('Service: Authentication service', () => {
     authenticationService.logIn(tokenJson);
   });
 
-  it('Can log out', (done) => {
+  it('can log out', (done) => {
     spyOn(authenticationService, 'setupRefreshTimer');
 
     broadcaster.on('loggedin').subscribe(() => {
@@ -109,22 +113,21 @@ describe('Service: Authentication service', () => {
     authenticationService.logIn(tokenJson);
   });
 
-  it('Refresh token processing', (done) => {
-    mockService.connections.subscribe((connection: MockConnection) => {
-      connection.mockRespond(new Response(
-        new ResponseOptions({
-          body: JSON.stringify({token: tokenJson}),
-          status: 201
-        })
-      ));
-    });
+  it('can refresh token processing', (done) => {
     spyOn(authenticationService, 'setupRefreshTimer');
 
-    broadcaster.on('loggedin').subscribe((data: number) => {
+    broadcaster.on('loggedin').subscribe(() => {
       let token = JSON.parse(tokenJson);
       expect(authenticationService.setupRefreshTimer).toHaveBeenCalledWith(token.expires_in);
       spyOn(authenticationService, 'processTokenResponse').and.callThrough();
+
       authenticationService.refreshToken();
+
+      // mock response
+      const req = httpTestingController.expectOne(authUrl + 'token/refresh');
+      req.flush({token: tokenJson},
+        { status: 201, statusText: 'ok' });
+
       expect(authenticationService.processTokenResponse).toHaveBeenCalled();
       done();
     });
@@ -138,19 +141,14 @@ describe('Service: Authentication service', () => {
       authenticationError = true;
     });
 
-    mockService.connections.subscribe((connection: any) => {
-      connection.mockError(new Response(
-        new ResponseOptions({
-          body: JSON.stringify({errors: [{code: 'validation_error'}]}),
-          headers: mockHeader,
-          status: 401
-        })
-      ));
-    });
-
-
     broadcaster.on('loggedin').subscribe((data: number) => {
       authenticationService.refreshToken();
+
+      // mock response
+      const req = httpTestingController.expectOne(authUrl + 'token/refresh');
+      req.flush({errors: [{code: 'validation_error'}]},
+        { status: 401, statusText: 'error', headers: authHeader  });
+
       expect(authenticationError).toBe(true, 'authentication error');
       done();
     });
@@ -160,17 +158,6 @@ describe('Service: Authentication service', () => {
 
 
   it('Openshift proxy token retrieval', (done) => {
-    // given
-    mockService.connections.subscribe((connection: MockConnection) => {
-      connection.mockRespond(new Response(
-        new ResponseOptions({
-          body: tokenJson,
-          status: 201
-        })
-      ));
-    });
-    spyOn(authenticationService, 'setupRefreshTimer');
-
     broadcaster.on('loggedin').subscribe((data: number) => {
       let token = JSON.parse(tokenJson);
       authenticationService.getOpenShiftToken().subscribe(output => {
@@ -186,24 +173,20 @@ describe('Service: Authentication service', () => {
   });
 
   it('Openshift valid connection test', (done) => {
-    // given
-    mockService.connections.subscribe((connection: MockConnection) => {
-      connection.mockRespond(new Response(
-        new ResponseOptions({
-          body: tokenJson,
-          status: 200
-        })
-      ));
-    });
-    spyOn(authenticationService, 'setupRefreshTimer');
+    const cluster = 'cluster';
 
     broadcaster.on('loggedin').subscribe((data: number) => {
-      authenticationService.isOpenShiftConnected('cluster').subscribe((output) => {
+      authenticationService.isOpenShiftConnected(cluster).subscribe((output) => {
         // then
         expect(output).toBe(true);
         authenticationService.logout();
         done();
       });
+
+      // mock response
+      const req = httpTestingController
+        .expectOne(`${authUrl}token?force_pull=true&for=${encodeURIComponent(cluster)}`);
+      req.flush('', { status: 200, statusText: 'ok' });
     });
 
     // when
@@ -211,26 +194,20 @@ describe('Service: Authentication service', () => {
   });
 
   it('Openshift valid connection test if cluster needs to be encoded', (done) => {
-    // given
-    mockService.connections.subscribe((connection: MockConnection) => {
-      const url = connection.request.url;
-      expect(url !== decodeURIComponent(url)).toBe(true);
-      connection.mockRespond(new Response(
-        new ResponseOptions({
-          body: tokenJson,
-          status: 200
-        })
-      ));
-    });
-    spyOn(authenticationService, 'setupRefreshTimer');
+    const cluster = 'cluster+somthing-else';
 
     broadcaster.on('loggedin').subscribe((data: number) => {
-      authenticationService.isOpenShiftConnected('cluster+something-else').subscribe((output) => {
+      authenticationService.isOpenShiftConnected(cluster).subscribe((output) => {
         // then
         expect(output).toBe(true);
         authenticationService.logout();
         done();
       });
+
+      // mock response
+      const req = httpTestingController
+        .expectOne(`${authUrl}token?force_pull=true&for=${encodeURIComponent(cluster)}`);
+      req.flush('', { status: 200, statusText: 'ok' });
     });
 
     // when
@@ -238,24 +215,20 @@ describe('Service: Authentication service', () => {
   });
 
   it('Openshift failed connection test', (done) => {
-    // given
-    mockService.connections.subscribe((connection: any) => {
-      connection.mockError(new Response(
-        new ResponseOptions({
-          body: tokenJson,
-          status: 401
-        })
-      ));
-    });
-    spyOn(authenticationService, 'setupRefreshTimer');
+    const cluster = 'cluster';
 
     broadcaster.on('loggedin').subscribe((data: number) => {
-      authenticationService.isOpenShiftConnected('cluster').subscribe((output) => {
+      authenticationService.isOpenShiftConnected(cluster).subscribe((output) => {
         // then
         expect(output).toBe(false);
         authenticationService.logout();
         done();
       });
+
+      // mock response
+      const req = httpTestingController
+        .expectOne(`${authUrl}token?force_pull=true&for=${encodeURIComponent(cluster)}`);
+      req.flush('', { status: 401, statusText: 'error' });
     });
 
     // when
@@ -264,18 +237,13 @@ describe('Service: Authentication service', () => {
 
 
   it('Github token processing', (done) => {
-    // given
-    mockService.connections.subscribe((connection: MockConnection) => {
-      connection.mockRespond(new Response(
-        new ResponseOptions({
-          body: tokenJson,
-          status: 201
-        })
-      ));
-    });
-    spyOn(authenticationService, 'setupRefreshTimer');
 
     broadcaster.on('loggedin').subscribe((data: number) => {
+      // mock response
+      const req = httpTestingController
+        .expectOne(`${authUrl}token?for=${encodeURIComponent('https://github.com')}`);
+      req.flush(JSON.parse(tokenJson), { status: 201, statusText: 'ok' });
+
       let token = JSON.parse(tokenJson);
       authenticationService.gitHubToken.subscribe(output => {
         // then
@@ -290,18 +258,12 @@ describe('Service: Authentication service', () => {
   });
 
   it('Github token clear', (done) => {
-    // given
-    mockService.connections.subscribe((connection: MockConnection) => {
-      connection.mockRespond(new Response(
-        new ResponseOptions({
-          body: tokenJson,
-          status: 201
-        })
-      ));
-    });
-    spyOn(authenticationService, 'setupRefreshTimer');
-
     broadcaster.on('loggedin').subscribe((data: number) => {
+      // mock response
+      const req = httpTestingController
+        .expectOne(`${authUrl}token?for=${encodeURIComponent('https://github.com')}`);
+      req.flush(JSON.parse(tokenJson), { status: 201, statusText: 'ok' });
+
       expect(localStorage.getItem('github_token')).not.toBeNull();
       authenticationService.clearGitHubToken();
     });
@@ -318,18 +280,12 @@ describe('Service: Authentication service', () => {
   });
 
   it('Github token processing', (done) => {
-    // given
-    mockService.connections.subscribe((connection: MockConnection) => {
-      connection.mockRespond(new Response(
-        new ResponseOptions({
-          body: tokenJson,
-          status: 201
-        })
-      ));
-    });
-    spyOn(authenticationService, 'setupRefreshTimer');
-
     broadcaster.on('loggedin').subscribe((data: number) => {
+      // mock response
+      const req = httpTestingController
+        .expectOne(`${authUrl}token?for=${encodeURIComponent('https://github.com')}`);
+      req.flush(JSON.parse(tokenJson), { status: 201, statusText: 'ok' });
+
       let token = JSON.parse(tokenJson);
       expect(authenticationService.getGitHubToken()).toBe(token.access_token);
       done();

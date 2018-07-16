@@ -1,17 +1,19 @@
 import { Injectable, Inject, NgZone } from '@angular/core';
-import { Http, Response, Headers, RequestOptions, RequestOptionsArgs } from '@angular/http';
+import { HttpClient, HttpResponse, HttpHeaders } from '@angular/common/http';
 
-import { Observable, Subject } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
+import { catchError, map, publishReplay, switchMap, tap } from 'rxjs/operators';
 import { Broadcaster } from 'ngx-base';
 
 import { AUTH_API_URL } from '../shared/auth-api';
 import { SSO_API_URL } from '../shared/sso-api';
 import { REALM } from '../shared/realm-token';
 import { Token } from '../user/token';
-import { isAuthenticationError } from '../shared/check-auth-error';
+import { isAuthenticationError } from '../shared/isAuthenticationError';
+import { ConnectableObservable } from 'rxjs/internal/observable/ConnectableObservable';
 
 export interface ProcessTokenResponse {
-  (response: Response): Token;
+  (response: HttpResponse<any>): Token;
 }
 
 @Injectable()
@@ -33,13 +35,13 @@ export class AuthenticationService {
     @Inject(AUTH_API_URL) apiUrl: string,
     @Inject(SSO_API_URL) ssoUrl: string,
     @Inject(REALM) realm: string,
-    private http: Http,
+    private http: HttpClient,
     private ngZone: NgZone
   ) {
     this.apiUrl = apiUrl;
     this.ssoUrl = ssoUrl;
     this.realm = realm;
-    this.gitHubToken = this.createFederatedToken(this.github, (response: Response) => response.json() as Token);
+    this.gitHubToken = this.createFederatedToken(this.github);
   }
 
   logIn(tokenParameter: string): boolean {
@@ -91,23 +93,28 @@ export class AuthenticationService {
    * Deprecated method - should be replaced with simple getToken() for connecting to OpenShift proxy now
    */
   getOpenShiftToken(): Observable<string> {
-    return Observable.of(this.getToken());
+    return of(this.getToken());
   }
 
   isOpenShiftConnected(cluster: string): Observable<boolean> {
-    let headers = new Headers({ 'Content-Type': 'application/json' });
     let tokenUrl = this.apiUrl + `token?force_pull=true&for=` + encodeURIComponent(cluster);
-    headers.set('Authorization', `Bearer ${this.getToken()}`);
-    let options = new RequestOptions({ headers: headers });
-    return this.http.get(tokenUrl, options)
-      .map(() => {
-        // token returned, openshift is connected
-        return true;
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${this.getToken()}`
       })
-      .catch(() => {
-        // with any exception coming back, return false
-        return Observable.of(false);
-      });
+    };
+    return this.http.get(tokenUrl, httpOptions)
+      .pipe(
+        map(() =>
+          // token returned, openshift is connected
+          true
+        ),
+        catchError(() => {
+          // with any exception coming back, return false
+          return of(false);
+        })
+      );
   }
 
 
@@ -135,27 +142,31 @@ export class AuthenticationService {
 
   refreshToken() {
     if (this.isLoggedIn()) {
-      let headers = new Headers({ 'Content-Type': 'application/json' });
-      let options: RequestOptions = new RequestOptions({ headers: headers });
       let refreshTokenUrl = this.apiUrl + 'token/refresh';
       let refreshToken = localStorage.getItem('refresh_token');
       let body = JSON.stringify({ 'refresh_token': refreshToken });
-      this.http.post(refreshTokenUrl, body, options)
-        .map((response: Response) => {
-          let responseJson = response.json();
-          let token = this.processTokenResponse(responseJson.token);
-          this.clearTimeoutId = null;
-          this.setupRefreshTimer(token.expires_in);
-          return token;
+      const httpOptions = {
+        headers: new HttpHeaders({
+          'Content-Type':  'application/json'
         })
-        .catch(response => {
-          // Additionally catch a 400 from keycloak
-          if (response.status === 400 || isAuthenticationError(response)) {
-            this.broadcaster.broadcast('authenticationError', response);
-          }
-          return Observable.of({} as Token);
-        })
-        .subscribe(token => {
+      };
+      this.http.post<any>(refreshTokenUrl, body, httpOptions)
+        .pipe(
+          map((t: any) => {
+            let token = this.processTokenResponse(t.token);
+            this.clearTimeoutId = null;
+            this.setupRefreshTimer(token.expires_in);
+            return token;
+          }),
+          catchError(response => {
+            // Additionally catch a 400 from keycloak
+            if (response.status === 400 || isAuthenticationError(response)) {
+              this.broadcaster.broadcast('authenticationError', response);
+            }
+            return of({} as Token);
+          })
+        )
+        .subscribe((token: Token) => {
           // Refresh any federated tokens that we have
           this.refreshTokens.next(token);
           console.log('token refreshed at:' + Date.now());
@@ -176,39 +187,43 @@ export class AuthenticationService {
 
   clearGitHubToken(): void {
     localStorage.removeItem(this.github + '_token');
-    this.gitHubToken = Observable.of('');
+    this.gitHubToken = of('');
   }
 
-  private createFederatedToken(broker: string, processToken: ProcessTokenResponse): Observable<string> {
-    let res = this.refreshTokens.switchMap((token: Token) => {
-      let headers = new Headers({ 'Content-Type': 'application/json' });
-      let tokenUrl = this.ssoUrl + `auth/realms/${this.realm}/broker/${broker}/token`;
-      if ( broker === this.github ) {
-        tokenUrl = this.apiUrl + `token?for=${encodeURIComponent('https://github.com')}`;
-      }
-      headers.set('Authorization', `Bearer ${token.access_token}`);
-      let options = new RequestOptions({ headers: headers });
-      return this.http.get(tokenUrl, options)
-        .map(response => processToken(response))
-        .catch(response => {
-          if (isAuthenticationError(response)) {
-            this.broadcaster.broadcast('authenticationError', response);
+  private createFederatedToken(broker: string): Observable<string> {
+    let res = this.refreshTokens
+      .pipe(
+        switchMap((token: Token) => {
+          let tokenUrl = this.ssoUrl + `auth/realms/${this.realm}/broker/${broker}/token`;
+          if ( broker === this.github ) {
+            tokenUrl = this.apiUrl + `token?for=${encodeURIComponent('https://github.com')}`;
           }
-          if (response.status === 400) {
-            this.broadcaster.broadcast('noFederatedToken', res);
-          }
-          return Observable.of({} as Token);
-        })
-        .do((shadowToken: Token) => {
-          if (shadowToken.access_token) {
-            localStorage.setItem(broker + '_token', shadowToken.access_token);
-          } else {
-            localStorage.removeItem(broker + '_token');
-          }
-        })
-        .map((t: Token) => t.access_token);
-    })
-      .publishReplay(1);
+          const httpOptions = {
+            headers: new HttpHeaders({
+              'Content-Type':  'application/json',
+              'Authorization': `Bearer ${token.access_token}`
+            })
+          };
+          return this.http.get<Token>(tokenUrl, httpOptions)
+            .pipe(
+              catchError(response => {
+                if (response.status === 400) {
+                  this.broadcaster.broadcast('noFederatedToken', res);
+                }
+                return of({} as Token);
+              }),
+              tap((shadowToken: Token) => {
+                if (shadowToken.access_token) {
+                  localStorage.setItem(broker + '_token', shadowToken.access_token);
+                } else {
+                  localStorage.removeItem(broker + '_token');
+                }
+              }),
+              map((t: Token) => t.access_token)
+            );
+        }),
+        publishReplay(1)
+      ) as ConnectableObservable<string>;
     res.connect();
     return res;
   }
