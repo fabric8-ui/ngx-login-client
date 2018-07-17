@@ -65,11 +65,11 @@ export class UserService {
     // and only expose currentLoggedInUser publicly
     this.loggedInUser = merge(
       broadcaster.on('loggedin')
-        .pipe(map((val: any) => 'loggedIn')),
+        .pipe(map(() => 'loggedIn')),
       broadcaster.on('logout')
-        .pipe(map((val: any) => 'loggedOut')),
+        .pipe(map(() => 'loggedOut')),
       broadcaster.on('authenticationError')
-        .pipe(map((val: any) => 'authenticationError'))
+        .pipe(map(() => 'authenticationError'))
     ).pipe(
       switchMap((val: any) => {
         // If it's a login event, then we need to retreive the user's details
