@@ -1,16 +1,12 @@
 
 const gulp = require('gulp'),
-  autoprefixer = require('autoprefixer'),
   changed = require('gulp-changed'),
   del = require('del'),
-  exec = require('child_process').exec,
   ngc = require('gulp-ngc'),
   path = require('path'),
-  postcss = require('postcss'),
   replace = require('gulp-string-replace'),
   runSequence = require('run-sequence'),
   sourcemaps = require('gulp-sourcemaps'),
-  stylus = require('stylus');
   util = require('gulp-util');
 
 const appSrc = 'src';
