@@ -92,7 +92,6 @@
     "@types/jasmine": "2.8.8",
     "@types/lodash": "4.14.112",
     "angular2-template-loader": "0.6.2",
-    "autoprefixer": "8.6.5",
     "child_process": "1.0.2",
     "clean-webpack-plugin": "0.1.19",
     "codelyzer": "4.4.2",
