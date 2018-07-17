@@ -1,5 +1,9 @@
 /**
  * Adapted from angular2-webpack-starter
+ *
+ * By using the name "webpack.common.js" we can have this file merged to the other
+ * webpack configs, thus giving us a place for shared/common settings.
+ *
  */
 const webpack = require('webpack');
 const helpers = require('./helpers');
