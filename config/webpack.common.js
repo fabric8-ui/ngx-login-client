@@ -7,14 +7,14 @@
  */
 const webpack = require('webpack');
 const helpers = require('./helpers');
-var path = require('path');
-var stringify = require('json-stringify');
+const path = require('path');
+const stringify = require('json-stringify');
 
 /**
  * Webpack Plugins
  */
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const OptimizeJsPlugin = require('optimize-js-plugin');
+const ContextReplacementPlugin = require('webpack/lib/ContextReplacementPlugin');
 
 /**
  * Webpack Constants
@@ -39,6 +39,13 @@ module.exports = {
    * See: http://webpack.github.io/docs/configuration.html#cache
    */
   //cache: false,
+
+  /**
+   * As of Webpack 4 we need to set the mode.
+   * Since this is a library and it uses gulp to build the library,
+   * we only have Test and Perf.
+   */
+  mode: 'development',
 
   /**
    * The entry point for the bundle
@@ -74,6 +81,21 @@ module.exports = {
   module: {
     rules: [
 
+      {
+        test: /\.ts$/,
+        enforce: 'pre',
+        use: [{
+          loader: 'tslint-loader',
+          options: {
+            emitErrors: false,
+            failOnHint: false,
+            resourcePath: 'src',
+            typeCheck: true,
+          }
+        }],
+        exclude: [helpers.root('node_modules')]
+      },
+
       /**
        * Typescript loader support for .ts and Angular 2 async routes via .async.ts
        * Replace templateUrl and stylesUrl with require()
@@ -81,12 +103,6 @@ module.exports = {
        * See: https://github.com/s-panferov/awesome-typescript-loader
        * See: https://github.com/TheLarkInn/angular2-template-loader
        */
-      // {
-      //   test: /\.ts$/,
-      //   enforce: 'pre',
-      //   use: 'tslint-loader',
-      //   exclude: [helpers.root('node_modules')]
-      // },
       {
         test: /\.ts$/,
         use: [
@@ -103,7 +119,9 @@ module.exports = {
        */
       {
         test: /\.json$/,
-        use: ['json-loader']
+        type: "javascript/auto",
+        use: ['custom-json-loader'],
+        exclude: [helpers.root('src/index.html')]
       }
     ]
   },
@@ -121,51 +139,17 @@ module.exports = {
      * See: https://webpack.github.io/docs/list-of-plugins.html#contextreplacementplugin
      * See: https://github.com/angular/angular/issues/11580
      */
-    new webpack.ContextReplacementPlugin(
+    new ContextReplacementPlugin(
+      // The (\\|\/) piece accounts for path separators in *nix and Windows
+      // /angular(\\|\/)core(\\|\/)@angular/,
+      /\@angular(\\|\/)core(\\|\/)fesm5/,
+      helpers.root('./src')
+    ),
+    new ContextReplacementPlugin(
       // The (\\|\/) piece accounts for path separators in *nix and Windows
       /angular(\\|\/)core(\\|\/)@angular/,
       helpers.root('./src')
     ),
-
-    /**
-     * Webpack plugin to optimize a JavaScript file for faster initial load
-     * by wrapping eagerly-invoked functions.
-     *
-     * See: https://github.com/vigneshshanmugam/optimize-js-plugin
-     */
-
-    new OptimizeJsPlugin({
-      sourceMap: false
-    }),
-
-    new HtmlWebpackPlugin(),
-
-    new webpack.LoaderOptionsPlugin({
-      options: {
-        tslintLoader: {
-          emitErrors: false,
-          failOnHint: false
-        },
-
-      }
-    }),
-    // Reference: http://webpack.github.io/docs/list-of-plugins.html#noerrorsplugin
-    // Only emit files when there are no errors
-    new webpack.NoEmitOnErrorsPlugin(),
-
-    // // Reference: http://webpack.github.io/docs/list-of-plugins.html#dedupeplugin
-    // // Dedupe modules in the output
-    // new webpack.optimize.DedupePlugin(),
-
-    // Reference: http://webpack.github.io/docs/list-of-plugins.html#uglifyjsplugin
-    // Minify all javascript, switch loaders to minimizing mode
-    // new webpack.optimize.UglifyJsPlugin({sourceMap: true, mangle: { keep_fnames: true }}),
-
-    // Copy assets from the public folder
-    // Reference: https://github.com/kevlened/copy-webpack-plugin
-    // new CopyWebpackPlugin([{
-    //   from: helpers.root('src/public')
-    // }]),
 
     // Reference: https://github.com/johnagan/clean-webpack-plugin
     // Removes the bundle folder before the build
@@ -175,6 +159,15 @@ module.exports = {
       dry: false
     })
   ],
+
+  /**
+   * These common plugins were removed from Webpack 3 and are now set in this object.
+   */
+  optimization: {
+    namedModules: true, // NamedModulesPlugin()
+    noEmitOnErrors: true, // NoEmitOnErrorsPlugin
+    concatenateModules: true //ModuleConcatenationPlugin
+  },
 
   /**
    * Include polyfills or mocks for various node stuff
