@@ -7,7 +7,8 @@ import {
   merge,
   of,
   ReplaySubject,
-  Subject
+  Subject,
+  throwError
 } from 'rxjs';
 import { catchError, map, multicast, publishReplay, switchMap, tap } from 'rxjs/operators';
 
@@ -224,6 +225,6 @@ export class UserService {
     if (isAuthenticationError(response)) {
       this.broadcaster.broadcast('authenticationError', response);
     }
-    return Observable.throw(response);
+    return throwError(response);
   }
 }
