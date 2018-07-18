@@ -28,12 +28,19 @@ const FABRIC8_RECOMMENDER_API_URL = process.env.FABRIC8_RECOMMENDER_API_URL || '
  *
  * See: http://webpack.github.io/docs/configuration.html#cli
  */
-module.exports = function (options) {
+module.exports = function () {
   return {
 
     entry: {
       'app': './index.ts'
     },
+
+    /**
+     * As of Webpack 4 we need to set the mode.
+     * Since this is a library and it uses gulp to build the library,
+     * we only have Test and Perf.
+     */
+    mode: 'development',
 
     /**
      * Source map for Karma from the help of karma-sourcemap-loader &  karma-webpack
@@ -118,7 +125,8 @@ module.exports = function (options) {
          */
         {
           test: /\.json$/,
-          use: ['json-loader'],
+          type: "javascript/auto",
+          use: ['custom-json-loader'],
           exclude: [helpers.root('src/index.html')]
         },
 
@@ -183,30 +191,7 @@ module.exports = function (options) {
         // The (\\|\/) piece accounts for path separators in *nix and Windows
         /angular(\\|\/)core(\\|\/)@angular/,
         helpers.root('src') // location of your src
-      ),
-
-      /**
-      * Plugin LoaderOptionsPlugin (experimental)
-      *
-      * See: https://gist.github.com/sokra/27b24881210b56bbaff7
-      */
-      new LoaderOptionsPlugin({
-        debug: true,
-        options: {
-
-          /**
-           * Static analysis linter for TypeScript advanced options configuration
-           * Description: An extensible linter for the TypeScript language.
-           *
-           * See: https://github.com/wbuchwalter/tslint-loader
-           */
-          tslint: {
-            emitErrors: false,
-            failOnHint: false,
-            resourcePath: 'src'
-          }
-        }
-      })
+      )
     ],
 
     /**
