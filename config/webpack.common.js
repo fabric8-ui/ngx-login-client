@@ -5,25 +5,13 @@
  * webpack configs, thus giving us a place for shared/common settings.
  *
  */
-const webpack = require('webpack');
 const helpers = require('./helpers');
-const path = require('path');
-const stringify = require('json-stringify');
 
 /**
  * Webpack Plugins
  */
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const ContextReplacementPlugin = require('webpack/lib/ContextReplacementPlugin');
-
-/**
- * Webpack Constants
- */
-const METADATA = {
-  baseUrl: '/',
-  isDevServer: helpers.isWebpackDevServer(),
-  FABRIC8_BRANDING: process.env.FABRIC8_BRANDING || 'fabric8'
-};
 
 /**
  * Webpack configuration
