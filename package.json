@@ -71,7 +71,7 @@
   "peerDependencies": {
     "@angular/core": "^6.1.0",
     "@angular/http": "^6.1.0",
-    "ngx-base": "^2.3.6",
+    "ngx-base": "^3.0.0",
     "rxjs": "^6.2.1"
   },
   "devDependencies": {
