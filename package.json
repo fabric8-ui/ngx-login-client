@@ -119,7 +119,7 @@
     "karma-firefox-launcher": "1.1.0",
     "karma-htmlfile-reporter": "0.3.5",
     "karma-jasmine": "1.1.2",
-    "karma-jasmine-html-reporter": "1.1.0",
+    "karma-jasmine-html-reporter": "1.2.0",
     "karma-mocha-reporter": "2.2.5",
     "karma-phantomjs-launcher": "1.0.4",
     "karma-remap-coverage": "0.1.5",
