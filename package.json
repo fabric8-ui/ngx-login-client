@@ -85,7 +85,7 @@
     "@angular/platform-browser-dynamic": "6.1.0",
     "@angular/router": "6.1.0",
     "@krux/condition-jenkins": "1.0.1",
-    "@ngtools/webpack": "6.0.8",
+    "@ngtools/webpack": "6.1.0",
     "@types/core-js": "2.5.0",
     "@types/jasmine": "2.8.8",
     "@types/lodash": "4.14.112",
