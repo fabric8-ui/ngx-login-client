@@ -1,16 +1,13 @@
 import { Injectable, Inject } from '@angular/core';
-import { Headers, Http, Response } from '@angular/http';
-
 import {
   Observable,
   ConnectableObservable,
   merge,
   of,
   ReplaySubject,
-  Subject,
   throwError
 } from 'rxjs';
-import { catchError, map, multicast, publishReplay, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, multicast, switchMap, tap } from 'rxjs/operators';
 
 import { cloneDeep } from 'lodash';
 import { Broadcaster, Logger } from 'ngx-base';
@@ -18,6 +15,7 @@ import { Broadcaster, Logger } from 'ngx-base';
 import { AUTH_API_URL } from '../shared/auth-api';
 import { isAuthenticationError } from '../shared/check-auth-error';
 import { User } from './user';
+import {HttpClient, HttpHeaders, HttpResponse} from '@angular/common/http';
 
 /**
  *  Provides user and user list methods to retrieve current or user list details
@@ -48,13 +46,13 @@ export class UserService {
    */
   private allUserData: User[] = [];
 
-  private headers = new Headers({ 'Content-Type': 'application/json' });
+  private headers = new HttpHeaders({ 'Content-Type': 'application/json' });
   private userUrl: string;  // URL to web api
   private usersUrl: string;  // URL to web api
   private searchUrl: string;
 
 
-  constructor(private http: Http,
+  constructor(private http: HttpClient,
     private logger: Logger,
     private broadcaster: Broadcaster,
     @Inject(AUTH_API_URL) apiUrl: string
@@ -73,13 +71,13 @@ export class UserService {
         .pipe(map(() => 'authenticationError'))
     ).pipe(
       switchMap((val: any) => {
-        // If it's a login event, then we need to retreive the user's details
+        // If it's a login event, then we need to retrieve the user's details
         if (val === 'loggedIn') {
           return this.http.get(this.userUrl, { headers: this.headers })
-            .pipe(map(response => cloneDeep(response.json().data as User)));
+            .pipe(map((response: {data: User}) => cloneDeep(response.data)));
         } else {
           // Otherwise, we clear the user
-          return of({} as User);
+          return of({});
         }
       }),
       tap((user: any) => {
@@ -102,8 +100,8 @@ export class UserService {
     return this.http
       .get(`${this.usersUrl}/${encodeURIComponent(userId)}`, { headers: this.headers })
       .pipe(
-        map(response => {
-          return response.json().data as User;
+        map((response: {data: User}) => {
+          return response.data;
         }),
         catchError(this.catchRequestError)
       );
@@ -132,13 +130,13 @@ export class UserService {
       return this.http
         .get(this.searchUrl + '/users?q=' + encodeURIComponent(search), {headers: this.headers})
         .pipe(
-          map(response => {
-            return response.json().data as User[];
+          map((response: {data: User[]}) => {
+            return response.data;
           }),
           catchError(this.catchRequestError)
         );
     }
-    return of([] as User[]);
+    return of([]);
   }
 
   /**
@@ -175,8 +173,8 @@ export class UserService {
     return this.http
       .get(this.usersUrl, { headers: this.headers })
       .pipe(
-        map(response => {
-        return response.json().data as User[];
+        map((response: {data: User[]}) => {
+        return response.data;
       }),
       catchError(this.catchRequestError),
       // TODO remove this
@@ -195,8 +193,8 @@ export class UserService {
     return this.http
       .get( `${this.usersUrl}?filter[username]=${encodeURIComponent(username)}`, { headers: this.headers })
       .pipe(
-        map(response => {
-          return response.json().data as User[];
+        map((response: {data: User[]}) => {
+          return response.data;
         }),
         catchError(this.catchRequestError)
       );
@@ -221,7 +219,7 @@ export class UserService {
     this.userData = {} as User;
   }
 
-  private catchRequestError = (response: Response) => {
+  private catchRequestError = (response: HttpResponse<JSON>) => {
     if (isAuthenticationError(response)) {
       this.broadcaster.broadcast('authenticationError', response);
     }
