@@ -160,7 +160,7 @@ export class AuthenticationService {
           }),
           catchError(response => {
             // Additionally catch a 400 from keycloak
-            if (response.status === 400 || isAuthenticationError(response)) {
+            if (response.status === 400) {
               this.broadcaster.broadcast('authenticationError', response);
             }
             return of({} as Token);
