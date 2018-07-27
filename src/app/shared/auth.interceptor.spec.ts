@@ -35,6 +35,9 @@ describe(`AuthHttpInterceptor`, () => {
       return key === 'auth_token' ? testToken : null;
     });
   });
+  afterEach(() => {
+    httpMock.verify();
+  });
 
   it('should add an Authorization header', () => {
     httpClient.get(testUrl).subscribe(() => {});
