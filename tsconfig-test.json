@@ -32,13 +32,8 @@
     ]
   },
   "files": [
-    "index.ts"
+    "app/src/index.ts"
   ],
-  "awesomeTypescriptLoaderOptions": {
-    "forkChecker": true,
-    "useWebpackText": true,
-    "useCache": true
-  },
   "angularCompilerOptions": {
     "strictMetadataEmit": true,
     "skipTemplateCodegen": true,

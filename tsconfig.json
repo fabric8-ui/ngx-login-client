@@ -29,15 +29,12 @@
     ]
   },
   "files": [
-    "index.ts"
+    "src/app/index.ts"
   ],
-  "awesomeTypescriptLoaderOptions": {
-    "forkChecker": true,
-    "useWebpackText": true
-  },
   "angularCompilerOptions": {
     "strictMetadataEmit": true,
-    "skipTemplateCodegen": true
+    "skipTemplateCodegen": true,
+    "genDir": "compiled"
   },
   "compileOnSave": false,
   "buildOnSave": false,
