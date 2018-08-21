@@ -1,10 +1,11 @@
+import { HttpHeaders } from '@angular/common/http';
+import { HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+
 import { Broadcaster, Logger } from 'ngx-base';
 
 import { AUTH_API_URL } from '../shared/auth-api';
 import { UserService } from './user.service';
-import { HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
-import { HttpHeaders } from '@angular/common/http';
 
 
 describe('Service: User service', () => {

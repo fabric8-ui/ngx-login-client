@@ -1,4 +1,6 @@
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Injectable, Inject } from '@angular/core';
+
 import {
   Observable,
   ConnectableObservable,
@@ -15,7 +17,6 @@ import { Broadcaster, Logger } from 'ngx-base';
 import { AUTH_API_URL } from '../shared/auth-api';
 import { isAuthenticationError } from '../shared/check-auth-error';
 import { User } from './user';
-import {HttpClient, HttpHeaders, HttpResponse} from '@angular/common/http';
 
 /**
  *  Provides user and user list methods to retrieve current or user list details
