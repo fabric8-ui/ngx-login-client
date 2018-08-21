@@ -146,7 +146,7 @@
     "rxjs-compat": "6.2.2",
     "rxjs-tslint": "0.1.5",
     "semantic-release": "8.2.0",
-    "source-map-loader": "0.2.3",
+    "source-map-loader": "0.2.4",
     "string-replace-loader": "2.1.1",
     "stylus": "0.54.5",
     "to-string-loader": "1.1.5",
