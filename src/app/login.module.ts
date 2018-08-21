@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 
-import { AlmUserName } from './src/app/user/alm-user-name.pipe';
+import { AlmUserName } from './user/alm-user-name.pipe';
 
 @NgModule({
   imports: [
