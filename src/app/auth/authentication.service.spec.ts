@@ -1,15 +1,14 @@
-
-import { async, inject, TestBed } from '@angular/core/testing';
-import {HttpClient, HttpResponse, HttpHeaders, HTTP_INTERCEPTORS} from '@angular/common/http';
+import {HttpClient, HTTP_INTERCEPTORS} from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { inject, TestBed } from '@angular/core/testing';
 
 import { Broadcaster } from 'ngx-base';
 
-import { SSO_API_URL } from '../shared/sso-api';
 import { AuthenticationService } from './authentication.service';
+import { AuthInterceptor } from '../shared/auth.interceptor';
+import { SSO_API_URL } from '../shared/sso-api';
 import { AUTH_API_URL } from '../shared/auth-api';
 import { REALM } from '../shared/realm-token';
-import {AuthInterceptor} from '../shared/auth.interceptor';
 
 describe('Service: Authentication service', () => {
 

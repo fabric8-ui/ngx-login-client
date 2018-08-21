@@ -58,7 +58,7 @@ module.exports = {
      *
      * See: https://webpack.js.org/configuration/resolve/#resolve-extensions
      */
-    extensions: ['.ts', '.js', '.json'],
+    extensions: ['.ts', '.js', '.json']
   },
 
   /**
@@ -100,7 +100,7 @@ module.exports = {
         exclude: [/\.(spec|e2e)\.ts$/]
       },
 
-      /*
+      /**
        * Json loader support for *.json files.
        *
        * See: https://github.com/webpack/json-loader

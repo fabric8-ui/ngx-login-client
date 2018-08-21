@@ -1,4 +1,4 @@
-import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 
 export function isAuthenticationError(res: HttpErrorResponse): boolean {
   if (res.status === 401) {
