@@ -88,7 +88,7 @@
     "@ngtools/webpack": "6.1.4",
     "@types/core-js": "2.5.0",
     "@types/jasmine": "2.8.8",
-    "@types/lodash": "4.14.113",
+    "@types/lodash": "4.14.116",
     "angular2-template-loader": "0.6.2",
     "child_process": "1.0.2",
     "clean-webpack-plugin": "0.1.19",
