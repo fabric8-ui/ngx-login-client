@@ -205,11 +205,3 @@ revert: feat(pencil): add 'graphiteWidth' option
 
 This reverts commit 667ecc1654a317a13331b17617d973392f415f02.
 ```
-
-### Commitizen - craft valid commit messages
-
-Commitizen helps you craft correct commit messages. Install it using `npm install commitizen -g`. Then run `git cz` rather than `git commit`.
-
-### Validate-commit-msg - validate commit messages
-
-The validate-commit-msg githook checks for invalid commit messages.
