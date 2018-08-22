@@ -19,6 +19,11 @@ prep() {
   yum -y install docker make git gcc-c++ bzip2 fontconfig
   curl -sL https://rpm.nodesource.com/setup_8.x | sudo -E bash -
   yum -y install nodejs
+
+  # set up chrome for running tests
+  COPY config/google-chrome.repo /etc/yum.repos.d/google-chrome.repo
+  RUN yum install -y google-chrome-stable
+
 }
 
 install_dependencies() {
@@ -34,8 +39,13 @@ install_dependencies() {
 }
 
 run_unit_tests() {
-  # Exec unit tests
-  npm run test:unit
+  # Set up logging
+  LOGFILE=$(pwd)/unit_tests.log
+  echo Using logfile $LOGFILE
+
+  # Running npm test
+  echo Running unit tests...
+  npm run test:unit | tee $LOGFILE ; UNIT_TEST_RESULT=${PIPESTATUS[0]}
 
   if [ $? -eq 0 ]; then
       echo 'CICO: unit tests OK'
