@@ -21,8 +21,8 @@ prep() {
   yum -y install nodejs
 
   # set up chrome for running tests
-  COPY config/google-chrome.repo /etc/yum.repos.d/google-chrome.repo
-  RUN yum install -y google-chrome-stable
+  cp config/google-chrome.repo /etc/yum.repos.d/google-chrome.repo
+  yum install -y google-chrome-stable
 
 }
 
