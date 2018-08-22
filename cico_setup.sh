@@ -16,9 +16,10 @@ load_jenkins_vars() {
 
 prep() {
   yum -y update
-  yum install centos-release-scl
   yum -y install docker make gcc-c++ bzip2 fontconfig rh-git29
-  scl enable rh-git29 bash
+  yum install centos-release-scl
+  yum install sclo-git212.x86_64
+  scl enable sclo-git212 /bin/bash
   curl -sL https://rpm.nodesource.com/setup_8.x | sudo -E bash -
   yum -y install nodejs
 
