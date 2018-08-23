@@ -36,6 +36,9 @@ install_dependencies() {
   cp config/google-chrome.repo /etc/yum.repos.d/google-chrome.repo
   yum install -y google-chrome-stable
 
+  # Try and set the git repo
+  git clone https://github.com/fabric8-ui/ngx-login-client
+
   if [ $? -eq 0 ]; then
       echo 'CICO: npm install : OK'
   else
