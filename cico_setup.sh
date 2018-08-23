@@ -19,7 +19,8 @@ prep() {
   yum -y install docker make gcc-c++ bzip2 fontconfig rh-git29
   yum -y install centos-release-scl
   yum -y install sclo-git212.x86_64
-  scl enable sclo-git212 cico_release.sh
+  scl enable sclo-git212 $(pwd)/cico_release.sh
+  scl enable sclo-git212 $(pwd)/fix-git-repo.sh
   curl -sL https://rpm.nodesource.com/setup_8.x | sudo -E bash -
   yum -y install nodejs
 
