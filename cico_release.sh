@@ -18,6 +18,10 @@ function release() {
     # Enable verbose output
     npm config set loglevel silly
 
+    # check where we are
+    git branch -va
+    git remote -v
+
     # Build and Release Planner (It will update the tag on github and push fabric8-planner to npmjs.org)
     npm run semantic-release
 
