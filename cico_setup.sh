@@ -38,6 +38,7 @@ install_dependencies() {
 
   # Try and set the git repo
   git clone https://github.com/fabric8-ui/ngx-login-client
+  cd ngx-login-client
 
   if [ $? -eq 0 ]; then
       echo 'CICO: npm install : OK'
