@@ -214,8 +214,6 @@
     "zone.js": "0.8.26"
   },
   "release": {
-    "branch": "master",
-    "debug": false,
     "pkgRoot": "dist"
   },
   "config": {
