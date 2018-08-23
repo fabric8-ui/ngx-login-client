@@ -215,6 +215,7 @@
   },
   "release": {
     "branch": "master",
+    "debug": "true",
     "pkgRoot": "dist"
   },
   "config": {
