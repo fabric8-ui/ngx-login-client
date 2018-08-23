@@ -29,6 +29,7 @@ prep() {
 }
 
 install_dependencies() {
+  git branch -v
   npm install;
   chmod +x /root/payload/node_modules/phantomjs-prebuilt/lib/phantom/bin/phantomjs
 
@@ -37,9 +38,9 @@ install_dependencies() {
   yum install -y google-chrome-stable
 
   # Try and set the git repo
-  git clone https://github.com/fabric8-ui/ngx-login-client
-  cd ngx-login-client
-  npm install
+  #git clone https://github.com/fabric8-ui/ngx-login-client
+  #cd ngx-login-client
+  #npm install
 
   if [ $? -eq 0 ]; then
       echo 'CICO: npm install : OK'
