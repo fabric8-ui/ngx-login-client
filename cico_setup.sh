@@ -16,12 +16,16 @@ load_jenkins_vars() {
 
 prep() {
   yum -y update
-  yum -y install docker make gcc-c++ bzip2 fontconfig rh-git29
+  yum -y install docker make gcc-c++ bzip2 fontconfig
+
+  # Get and set up git v2.12
   yum -y install centos-release-scl
   yum -y install sclo-git212.x86_64
+  export PATH=${PATH}:/opt/rh/sclo-git212/root/usr/bin/
+
+  # Get and set up Nodejs
   curl -sL https://rpm.nodesource.com/setup_8.x | sudo -E bash -
   yum -y install nodejs
-  export PATH=${PATH}:/opt/rh/sclo-git212/root/usr/bin/
 }
 
 install_dependencies() {
