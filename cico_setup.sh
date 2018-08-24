@@ -38,6 +38,7 @@ install_dependencies() {
 
   # Set the branch as it defaults to the branch 'origin/master'
   git checkout master
+  export GIT_BRANCH=master
   # check where we are
   git branch -va
   git remote -v
