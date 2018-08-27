@@ -21,14 +21,13 @@
     "noEmitHelpers": false, // Planner and demo won't run when true
     "noImplicitAny": true,
     "outDir": "dist",
-    "noEmit": true,
     "paths": {
       "@angular/core": ["node_modules/@angular/core"],
       "@angular/http": ["node_modules/@angular/http"],
       "@angular/router": ["node_modules/@angular/router"],
       "rxjs/*": ["node_modules/rxjs/*"]
     },
-    "rootDir": "build/src/app",
+    "rootDir": ".",
     "skipLibCheck": true,
     "sourceMap": true,
     "strictNullChecks": false,
@@ -36,6 +35,6 @@
     "target": "es5"
   },
   "files": [
-    "build/src/app/index.ts"
+    "src/app/index.ts"
   ]
 }
