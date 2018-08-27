@@ -1,21 +1,24 @@
 {
+  "angularCompilerOptions": {
+    "genDir": "compiled",
+    "skipTemplateCodegen": true,
+    "strictMetadataEmit": true
+  },
+  "atom": { "rewriteTsconfig": false },
+  "buildOnSave": false,
+  "compileOnSave": false,
   "compilerOptions": {
-    "target": "es5",
-    "module": "esnext",
-    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
     "declaration": true,
-    "stripInternal": true,
-    "skipLibCheck": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
     "inlineSources": true,
-    "noEmitHelpers": false,
-    "strictNullChecks": false,
+    "lib": [ "dom", "es6" ],
+    "module": "es2015",
+    "moduleResolution": "node",
+    "noEmitHelpers": false, // Planner and demo won't run when true
     "noImplicitAny": true,
-    "baseUrl": ".",
-    "rootDir": ".",
     "outDir": "dist",
     "paths": {
       "@angular/core": ["node_modules/@angular/core"],
@@ -23,20 +26,14 @@
       "@angular/router": ["node_modules/@angular/router"],
       "rxjs/*": ["node_modules/rxjs/*"]
     },
-    "lib": [
-      "es2015",
-      "dom"
-    ]
+    "rootDir": "build/src/app",
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strictNullChecks": false,
+    "stripInternal": true,
+    "target": "es5"
   },
   "files": [
-    "src/app/index.ts"
-  ],
-  "angularCompilerOptions": {
-    "strictMetadataEmit": true,
-    "skipTemplateCodegen": true,
-    "genDir": "compiled"
-  },
-  "compileOnSave": false,
-  "buildOnSave": false,
-  "atom": { "rewriteTsconfig": false }
+    "build/src/app/index.ts"
+  ]
 }
