@@ -82,7 +82,7 @@
     "@angular/core": "^6.1.0",
     "@angular/http": "^6.1.0",
     "ngx-base": "^3.1.0",
-    "rxjs": "^6.2.1"
+    "rxjs": "^6.3.0"
   },
   "devDependencies": {
     "@angular/common": "6.1.6",
@@ -182,7 +182,7 @@
     "resolve-url-loader": "2.3.0",
     "rimraf": "2.6.2",
     "run-sequence": "2.2.1",
-    "rxjs": "6.2.2",
+    "rxjs": "6.3.1",
     "rxjs-compat": "6.2.2",
     "rxjs-tslint": "0.1.5",
     "script-ext-html-webpack-plugin": "2.0.1",
