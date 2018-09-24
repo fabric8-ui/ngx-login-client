@@ -9,7 +9,6 @@ import { AUTH_API_URL } from '../shared/auth-api';
 import { SSO_API_URL } from '../shared/sso-api';
 import { REALM } from '../shared/realm-token';
 import { Token } from '../user/token';
-import { isAuthenticationError } from '../shared/isAuthenticationError';
 import { ConnectableObservable } from 'rxjs/internal/observable/ConnectableObservable';
 
 export interface ProcessTokenResponse {
@@ -100,8 +99,7 @@ export class AuthenticationService {
     let tokenUrl = this.apiUrl + `token?force_pull=true&for=` + encodeURIComponent(cluster);
     const httpOptions = {
       headers: new HttpHeaders({
-        'Content-Type':  'application/json',
-        'Authorization': `Bearer ${this.getToken()}`
+        'Content-Type':  'application/json'
       })
     };
     return this.http.get(tokenUrl, httpOptions)

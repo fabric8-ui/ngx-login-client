@@ -6,16 +6,14 @@ import {
   ConnectableObservable,
   merge,
   of,
-  ReplaySubject,
-  throwError
+  ReplaySubject
 } from 'rxjs';
-import { catchError, map, multicast, switchMap, tap } from 'rxjs/operators';
+import { map, multicast, switchMap, tap } from 'rxjs/operators';
 
 import { cloneDeep } from 'lodash';
 import { Broadcaster, Logger } from 'ngx-base';
 
 import { AUTH_API_URL } from '../shared/auth-api';
-import { isAuthenticationError } from '../shared/check-auth-error';
 import { User } from './user';
 
 /**
@@ -74,8 +72,11 @@ export class UserService {
       switchMap((val: any) => {
         // If it's a login event, then we need to retrieve the user's details
         if (val === 'loggedIn') {
-          return this.http.get(this.userUrl, { headers: this.headers })
-            .pipe(map((response: {data: User}) => cloneDeep(response.data)));
+          return this.http
+            .get(this.userUrl, { headers: this.headers })
+            .pipe(
+              map((response: {data: User}) => cloneDeep(response.data))
+            );
         } else {
           // Otherwise, we clear the user
           return of({});
@@ -101,10 +102,7 @@ export class UserService {
     return this.http
       .get(`${this.usersUrl}/${encodeURIComponent(userId)}`, { headers: this.headers })
       .pipe(
-        map((response: {data: User}) => {
-          return response.data;
-        }),
-        catchError(this.catchRequestError)
+        map((response: {data: User}) => response.data)
       );
   }
 
@@ -131,10 +129,7 @@ export class UserService {
       return this.http
         .get(this.searchUrl + '/users?q=' + encodeURIComponent(search), {headers: this.headers})
         .pipe(
-          map((response: {data: User[]}) => {
-            return response.data;
-          }),
-          catchError(this.catchRequestError)
+          map((response: {data: User[]}) => response.data)
         );
     }
     return of([]);
@@ -174,12 +169,9 @@ export class UserService {
     return this.http
       .get(this.usersUrl, { headers: this.headers })
       .pipe(
-        map((response: {data: User[]}) => {
-        return response.data;
-      }),
-      catchError(this.catchRequestError),
-      // TODO remove this
-      tap(val => this.allUserData = val)
+        map((response: {data: User[]}) => response.data),
+        // TODO remove this
+        tap(val => this.allUserData = val)
       );
   }
 
@@ -194,22 +186,17 @@ export class UserService {
     return this.http
       .get( `${this.usersUrl}?filter[username]=${encodeURIComponent(username)}`, { headers: this.headers })
       .pipe(
-        map((response: {data: User[]}) => {
-          return response.data;
-        }),
-        catchError(this.catchRequestError)
+        map((response: {data: User[]}) => response.data)
       );
   }
 
   /**
    * Send email verification link to user.
    */
-  sendEmailVerificationLink(): Observable<Response> {
+  sendEmailVerificationLink(): Observable<HttpResponse<any>> {
+    const url = this.usersUrl + '/verificationcode';
     return this.http
-      .post(this.usersUrl + '/verificationcode', '', { headers: this.headers })
-      .pipe(map((response: Response) => {
-        return response;
-      }));
+      .post(url, null, { headers: this.headers, observe: 'response' , responseType: 'text'});
   }
 
   /**
@@ -218,12 +205,5 @@ export class UserService {
    */
   resetUser(): void {
     this.userData = {} as User;
-  }
-
-  private catchRequestError = (response: HttpResponse<JSON>) => {
-    if (isAuthenticationError(response)) {
-      this.broadcaster.broadcast('authenticationError', response);
-    }
-    return throwError(response);
   }
 }
