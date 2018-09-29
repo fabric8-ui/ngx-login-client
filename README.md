@@ -18,7 +18,7 @@ extracted to provide a shared set of services.
 
 ## Getting started:
 
-This library does not run on it's own. It must be imported. 
+This library does not run on it's own. It must be imported.  
 
 `npm install ngx-login-client`
 
