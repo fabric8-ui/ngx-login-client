@@ -1,4 +1,4 @@
-import { HttpHeaders } from '@angular/common/http';
+import { HttpHeaders, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
@@ -6,6 +6,9 @@ import { Broadcaster, Logger } from 'ngx-base';
 
 import { AUTH_API_URL } from '../shared/auth-api';
 import { UserService } from './user.service';
+import { AuthInterceptor } from '../shared/auth.interceptor';
+import { SSO_API_URL } from '../shared/sso-api';
+import { WIT_API_URL } from '../shared/wit-api';
 
 
 describe('Service: User service', () => {
@@ -20,9 +23,13 @@ describe('Service: User service', () => {
       providers: [
         UserService,
         {
-          provide: AUTH_API_URL,
-          useValue: 'http://example.com/'
+          provide: HTTP_INTERCEPTORS,
+          useClass: AuthInterceptor,
+          multi: true
         },
+        { provide: AUTH_API_URL, useValue: 'http://auth.example.com/' },
+        { provide: SSO_API_URL, useValue: 'http://sso.example.com/auth' },
+        { provide: WIT_API_URL, useValue: 'http://wit.example.com'},
         Broadcaster,
         Logger
       ]

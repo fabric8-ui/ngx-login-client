@@ -9,14 +9,14 @@ import { AuthInterceptor } from '../shared/auth.interceptor';
 import { SSO_API_URL } from '../shared/sso-api';
 import { AUTH_API_URL } from '../shared/auth-api';
 import { REALM } from '../shared/realm-token';
+import { WIT_API_URL } from '../shared/wit-api';
 
 describe('Service: Authentication service', () => {
 
-  const authUrl: string = 'http://example.com/';
+  const authUrl: string = 'http://auth.example.com/';
   let authenticationService: AuthenticationService;
   let broadcaster: Broadcaster;
   let httpClient: HttpClient;
-  let httpClientTestingModule: HttpClientTestingModule;
   let httpTestingController: HttpTestingController;
 
   beforeEach(() => {
@@ -31,18 +31,10 @@ describe('Service: Authentication service', () => {
           useClass: AuthInterceptor,
           multi: true
         },
-        {
-          provide: AUTH_API_URL,
-          useValue: 'http://example.com/'
-        },
-        {
-          provide: REALM,
-          useValue: 'fabric8'
-        },
-        {
-          provide: SSO_API_URL,
-          useValue: 'http://example.com/auth'
-        },
+        { provide: REALM, useValue: 'fabric8' },
+        { provide: AUTH_API_URL, useValue: 'http://auth.example.com/' },
+        { provide: SSO_API_URL, useValue: 'http://sso.example.com/auth' },
+        { provide: WIT_API_URL, useValue: 'http://wit.example.com'},
         Broadcaster
       ]
     });
