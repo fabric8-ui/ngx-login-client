@@ -9,7 +9,7 @@ import { AuthInterceptor } from '../shared/auth.interceptor';
 import { SSO_API_URL } from '../shared/sso-api';
 import { AUTH_API_URL } from '../shared/auth-api';
 import { REALM } from '../shared/realm-token';
-import { WIT_API_URL } from '../shared/wit-api';
+import { WIT_API_PROXY } from '../shared/wit-api';
 
 describe('Service: Authentication service', () => {
 
@@ -34,7 +34,7 @@ describe('Service: Authentication service', () => {
         { provide: REALM, useValue: 'fabric8' },
         { provide: AUTH_API_URL, useValue: 'http://auth.example.com/' },
         { provide: SSO_API_URL, useValue: 'http://sso.example.com/auth' },
-        { provide: WIT_API_URL, useValue: 'http://wit.example.com'},
+        { provide: WIT_API_PROXY, useValue: 'http://wit.example.com'},
         Broadcaster
       ]
     });

@@ -8,7 +8,7 @@ import { AUTH_API_URL } from '../shared/auth-api';
 import { UserService } from './user.service';
 import { AuthInterceptor } from '../shared/auth.interceptor';
 import { SSO_API_URL } from '../shared/sso-api';
-import { WIT_API_URL } from '../shared/wit-api';
+import { WIT_API_PROXY } from '../shared/wit-api';
 
 
 describe('Service: User service', () => {
@@ -29,7 +29,7 @@ describe('Service: User service', () => {
         },
         { provide: AUTH_API_URL, useValue: 'http://auth.example.com/' },
         { provide: SSO_API_URL, useValue: 'http://sso.example.com/auth' },
-        { provide: WIT_API_URL, useValue: 'http://wit.example.com'},
+        { provide: WIT_API_PROXY, useValue: 'http://wit.example.com'},
         Broadcaster,
         Logger
       ]
