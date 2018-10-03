@@ -6,7 +6,7 @@ import {
 import { TestBed } from '@angular/core/testing';
 import { Broadcaster } from 'ngx-base';
 import { AuthInterceptor } from './auth.interceptor';
-import { WIT_API_URL } from './wit-api';
+import { WIT_API_PROXY } from './wit-api';
 import { AUTH_API_URL } from './auth-api';
 import { SSO_API_URL } from './sso-api';
 
@@ -29,7 +29,7 @@ describe(`AuthHttpInterceptor`, () => {
           useClass: AuthInterceptor,
           multi: true
         },
-        { provide: WIT_API_URL, useValue: 'http://wit.example.com'},
+        { provide: WIT_API_PROXY, useValue: 'http://wit.example.com'},
         { provide: AUTH_API_URL, useValue: 'http://auth.example.com'},
         { provide: SSO_API_URL, useValue: 'http://sso.example.com'},
         Broadcaster

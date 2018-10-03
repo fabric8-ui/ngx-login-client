@@ -13,7 +13,7 @@ import { tap } from 'rxjs/operators';
 
 import { Broadcaster } from 'ngx-base';
 
-import { WIT_API_URL } from './wit-api';
+import { WIT_API_PROXY } from './wit-api';
 import { AUTH_API_URL } from './auth-api';
 import { SSO_API_URL } from './sso-api';
 
@@ -22,7 +22,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
   constructor(
     @Inject(forwardRef(() => Broadcaster)) private broadcaster: Broadcaster,
-    @Inject(WIT_API_URL) private witApiUrl: string,
+    @Inject(WIT_API_PROXY) private witApiUrl: string,
     @Inject(AUTH_API_URL) private authApiUrl: string,
     @Inject(SSO_API_URL) private ssoUrl: string
   ) {}
