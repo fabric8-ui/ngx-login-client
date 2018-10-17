@@ -15,21 +15,29 @@ export class PermissionService {
     this.jwtHelper = new JwtHelperService();
   }
 
+  /**
+   * Returns all the scopes a user has for a specific resource.
+   * @param resourceId ID of a specific resource such as a Space
+   */
   getAllScopes(resourceId: string): Array<string> {
     const permissions = this.getPermission(resourceId);
     return permissions ? permissions.scopes : [];
   }
 
+  /**
+   * Checks if a user has a specific scope for a resource.
+   * @param resourceId ID of a specific resource such as a Space
+   * @param scope the scope you want to check for. Ex - `can edit`
+   */
   checkScope(resourceId: string, scope: string): boolean {
     const permissions = this.getPermission(resourceId);
     return permissions ? permissions.scopes.includes(scope) : false;
   }
 
-  getDecodedToken() {
-    const token = localStorage.getItem('auth_token');
-    return token ? this.jwtHelper.decodeToken(token) : '';
-  }
-
+  /**
+   * Returns the permission for a specific resource.
+   * @param resourceId ID of a specific resource such as a Space
+   */
   getPermission(resourceId: string): Permission {
     const decodedToken = this.getDecodedToken();
     if (this.isValidRPT(decodedToken)) {
@@ -37,8 +45,19 @@ export class PermissionService {
     }
   }
 
+  /**
+   * Decodes the JWT token using JwtHelperService from `angular-jwt`.
+   */
+  getDecodedToken() {
+    const token = localStorage.getItem('auth_token');
+    return token ? this.jwtHelper.decodeToken(token) : '';
+  }
+
+  /**
+   * Checks if the decoded token is valid RPT by checking the permissions claim.
+   * @param token Decoded JWT token.
+   */
   isValidRPT(token: any) {
     return token && token.permissions;
   }
-
 }
