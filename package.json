@@ -76,6 +76,7 @@
     "npm": ">= 5.3.0"
   },
   "dependencies": {
+    "@auth0/angular-jwt": "^2.0.0",
     "lodash": "^4.17.10"
   },
   "peerDependencies": {
