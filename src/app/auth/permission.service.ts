@@ -10,10 +10,7 @@ export type Permission = {
 
 @Injectable()
 export class PermissionService {
-  jwtHelper: JwtHelperService;
-  constructor() {
-    this.jwtHelper = new JwtHelperService();
-  }
+  private jwtHelper: JwtHelperService = new JwtHelperService();
 
   /**
    * Returns all the scopes a user has for a specific resource.
@@ -38,17 +35,18 @@ export class PermissionService {
    * Returns the permission for a specific resource.
    * @param resourceId ID of a specific resource such as a Space
    */
-  getPermission(resourceId: string): Permission {
+  getPermission(resourceId: string): Permission | null {
     const decodedToken = this.getDecodedToken();
     if (this.isValidRPT(decodedToken)) {
       return decodedToken.permissions.find((permission: Permission) => permission.resource_set_id === resourceId);
     }
+    return null;
   }
 
   /**
    * Decodes the JWT token using JwtHelperService from `angular-jwt`.
    */
-  getDecodedToken() {
+  private getDecodedToken(): any {
     const token = localStorage.getItem('auth_token');
     return token ? this.jwtHelper.decodeToken(token) : '';
   }
@@ -57,7 +55,7 @@ export class PermissionService {
    * Checks if the decoded token is valid RPT by checking the permissions claim.
    * @param token Decoded JWT token.
    */
-  isValidRPT(token: any) {
+  private isValidRPT(token: any) {
     return token && token.permissions;
   }
 }

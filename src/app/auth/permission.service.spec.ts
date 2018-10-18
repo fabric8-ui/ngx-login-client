@@ -18,22 +18,17 @@ describe('Service: Permission Service', () => {
     localStorage.setItem('auth_token', fakeToken);
   });
 
-  it('should decode the token', () => {
-    const token = service.getDecodedToken();
-    expect(token.typ).toBe('Bearer');
-  });
-
-  it('should return permissions', () => {
+  it('should return permission for a resource', () => {
     const permission: Permission = service.getPermission(fakeResourceId);
     expect(permission.resource_set_id).toBe(fakeResourceId);
   });
 
-  it('should check for scope', () => {
+  it('should check for scope for a resource', () => {
     expect(service.checkScope(fakeResourceId, 'lima')).toBe(true);
     expect(service.checkScope(fakeResourceId, 'bean')).toBe(false);
   });
 
-  it('should return all scopes', () => {
+  it('should return all scopes for a resource', () => {
     const scopes = service.getAllScopes(fakeResourceId);
     expect(scopes.length).toBe(1);
     expect(scopes.includes('lima')).toBe(true);
