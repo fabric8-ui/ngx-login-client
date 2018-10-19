@@ -26,7 +26,7 @@ export class PermissionService {
    * @param resourceId ID of a specific resource such as a Space
    * @param scope the scope you want to check for. Ex - `can edit`
    */
-  checkScope(resourceId: string, scope: string): boolean {
+  hasScope(resourceId: string, scope: string): boolean {
     const permissions = this.getPermission(resourceId);
     return permissions ? permissions.scopes.includes(scope) : false;
   }

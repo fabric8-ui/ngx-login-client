@@ -24,8 +24,8 @@ describe('Service: Permission Service', () => {
   });
 
   it('should check for scope for a resource', () => {
-    expect(service.checkScope(fakeResourceId, 'lima')).toBe(true);
-    expect(service.checkScope(fakeResourceId, 'bean')).toBe(false);
+    expect(service.hasScope(fakeResourceId, 'lima')).toBe(true);
+    expect(service.hasScope(fakeResourceId, 'bean')).toBe(false);
   });
 
   it('should return all scopes for a resource', () => {
