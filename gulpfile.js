@@ -5,7 +5,7 @@ const gulp = require('gulp'),
   cssmin = require('gulp-cssmin'),
   del = require('del'),
   exec = require('child_process').exec,
-  gulpngc = require('gulp-ngc'),
+  // gulpngc = require('gulp-ngc'),
   fs = require("fs"),
   htmlMinifier = require('html-minifier'),
   lessCompiler = require('gulp-less'),
@@ -13,7 +13,7 @@ const gulp = require('gulp'),
   path = require('path'),
   postcss = require('postcss'),
   replace = require('gulp-replace'),
-  rename = require('gulp-rename');
+  rename = require('gulp-rename'),
   sourcemaps = require('gulp-sourcemaps'),
   stylelint = require('gulp-stylelint'),
   stylus = require('stylus');
@@ -185,7 +185,7 @@ function inlineTemplate() {
 }
 
 // Build the components
-function transpile() {
+//function transpile() {
   /**
    * Stick with gulp-ngc v0.2.1 due to "function calls are not supported in decorators" issue
    *
@@ -195,8 +195,23 @@ function transpile() {
    * gulp-ngc v0.3.0 uses different args
    * See: https://github.com/jolly-roger/gulp-ngc/issues/9
    */
-  return gulpngc('tsconfig.json');
+//  return gulpngc('tsconfig.json');
+//}
+/**
+ * Since the gulpngc is no longer being supported we need to us ngc
+ *
+ * @returns {ChildProcess}
+ */
+function transpile() {
+  return exec('node_modules/.bin/ngc -p tsconfig.json', function (err, stdout, stderr) {
+    console.log(stdout);
+    console.log(stderr);
+    if (err !== null) {
+      process.exit(1);
+    }
+  });
 }
+
 
 // Build with AOT enabled
 function transpileAot() {
