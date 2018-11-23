@@ -75,14 +75,14 @@ export class PermissionService {
    * @param userIDs IDs for users that need to be assigned the specified role.
    */
   assignRole(resourceId: string, roleName: string, userIDs: Array<string>): Observable<any> {
-    const url = `${this.authApi}resource/${resourceId}/roles`;
+    const url = `${this.authApi}resources/${resourceId}/roles`;
     const payload = {
       data: [
         { ids: userIDs, role: roleName }
       ]
     };
     return this.http
-      .post(url, payload, { headers: this.headers, responseType: 'text' });
+      .put(url, payload, { headers: this.headers, responseType: 'text' });
   }
 
   /**
@@ -91,7 +91,7 @@ export class PermissionService {
    * @param roleName Role to get all the users for the resource
    */
   getUsersByRole(resourceId: string, roleName: string): Observable<UserRoleData[]> {
-    const url = `${this.authApi}resources/${resourceId}/${roleName}`;
+    const url = `${this.authApi}resources/${resourceId}/roles/${roleName}`;
     return this.http
       .get(url, { headers: this.headers })
       .pipe(

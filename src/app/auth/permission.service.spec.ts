@@ -104,8 +104,8 @@ describe('Service: Permission Service', () => {
   it('should assign a role to users', () => {
     service.assignRole(fakeResourceId, 'admin', ['user-1', 'user-2']).subscribe();
 
-    const req = httpTestingController.expectOne(`${authUrl}resource/${fakeResourceId}/roles`);
-    expect(req.request.method).toBe('POST');
+    const req = httpTestingController.expectOne(`${authUrl}resources/${fakeResourceId}/roles`);
+    expect(req.request.method).toBe('PUT');
     req.flush('');
   });
 
@@ -115,7 +115,7 @@ describe('Service: Permission Service', () => {
         expect(users).toBe(fakeUsers);
       });
 
-    const req = httpTestingController.expectOne(`${authUrl}resources/${fakeResourceId}/admin`);
+    const req = httpTestingController.expectOne(`${authUrl}resources/${fakeResourceId}/roles/admin`);
     expect(req.request.method).toBe('GET');
     req.flush({ data: fakeUsers });
   });
