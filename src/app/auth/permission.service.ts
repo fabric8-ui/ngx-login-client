@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { AUTH_API_URL } from '../shared/auth-api';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, iif, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export type Permission = {
@@ -34,9 +34,10 @@ export class PermissionService {
    * Returns all the scopes a user has for a specific resource.
    * @param resourceId ID of a specific resource such as a Space
    */
-  getAllScopes(resourceId: string): Array<string> {
-    const permission = this.getPermission(resourceId);
-    return permission ? permission.scopes : [];
+  getAllScopes(resourceId: string): Observable<string[]> {
+    return this.getPermission(resourceId).pipe(
+      map((permission: Permission) => permission.scopes)
+    );
   }
 
   /**
@@ -44,9 +45,10 @@ export class PermissionService {
    * @param resourceId ID of a specific resource such as a Space
    * @param scope the scope you want to check for. Ex - `can edit`
    */
-  hasScope(resourceId: string, scope: string): boolean {
-    const permission = this.getPermission(resourceId);
-    return permission ? permission.scopes.includes(scope) : false;
+  hasScope(resourceId: string, scope: string): Observable<boolean> {
+    return this.getPermission(resourceId).pipe(
+      map((permission: Permission) => permission.scopes.includes(scope))
+    );
   }
 
   /**
@@ -54,18 +56,13 @@ export class PermissionService {
    * If there is no permission info in current RPT then we need to audit new RPT token.
    * @param resourceId ID of a specific resource such as a Space
    */
-  getPermission(resourceId: string): Permission | null {
-    let decodedToken = this.getDecodedToken(resourceId);
-    let permission = this.findPermission(decodedToken, resourceId);
-    if (!permission) {
-      this.auditRPT(resourceId).subscribe(newDecodedToken => {
-        if (newDecodedToken) {
-          decodedToken = newDecodedToken;
-          permission = this.findPermission(decodedToken, resourceId);
-        }
-      });
-    }
-    return permission || null;
+  getPermission(resourceId: string): Observable<Permission | undefined> {
+    const permission = this.findPermission(this.getDecodedToken(), resourceId);
+    return iif(
+      () => !!permission,
+      of(permission),
+      this.findPermissionAfterAudit(resourceId)
+    );
   }
 
   /**
@@ -104,18 +101,17 @@ export class PermissionService {
    * Or if the token doesn't contain permission info for a particular resource
    * @param resourceId ID of a specific resource such as a Space
    */
-  auditRPT(resourceId: string): Observable<any> {
+  findPermissionAfterAudit(resourceId: string): Observable<Permission | undefined> {
     const url = `${this.authApi}token/audit`;
     const params = new HttpParams().set('resource_id', resourceId);
     return this.http
-      .post(url, { headers: this.headers, params })
+      .post(url, '', { headers: this.headers, params })
       .pipe(
-        map((res: {'rpt_token': string} | null): any => {
+        map((res: {'rpt_token': string} | undefined): Permission | undefined => {
           if (res) {
-            this.refreshAuthToken(res.rpt_token);
-            return this.jwtHelper.decodeToken(res.rpt_token);
+            this.saveRPT(res.rpt_token);
+            return this.findPermission(this.getDecodedToken(), resourceId);
           }
-          return res;
         })
       );
   }
@@ -125,8 +121,8 @@ export class PermissionService {
    * @param token Decoded RPT token
    * @param resourceId ID of a specific resource such as a Space
    */
-  private findPermission(token: any, resourceId: string): Permission {
-    return token.permissions
+  private findPermission(token: any, resourceId: string): Permission | undefined {
+    return token && token.permissions && token.permissions
       .find((perm: Permission): boolean => perm.resource_set_id === resourceId);
   }
 
@@ -134,33 +130,16 @@ export class PermissionService {
    * Saves new token with RPT info as auth_token in localStorage.
    * @param rpt RPT token returned after calling audit API
    */
-  private refreshAuthToken(rpt: string): void {
+  private saveRPT(rpt: string): void {
     localStorage.setItem('auth_token', rpt);
   }
 
   /**
    * Decodes the JWT token using JwtHelperService from `angular-jwt`.
    * If the token if not valid RPT the  call auditRPT to get new token.
-   * @param resourceId ID of a specific resource such as a Space. Needed for auditRPT
    */
-  private getDecodedToken(resourceId: string): any {
+  private getDecodedToken(): any {
     const token = localStorage.getItem('auth_token');
-    let decodedToken = token ? this.jwtHelper.decodeToken(token) : '';
-    if (!this.isValidRPT(decodedToken)) {
-      this.auditRPT(resourceId).subscribe(newDecodedToken => {
-        if (newDecodedToken) {
-          decodedToken = newDecodedToken;
-        }
-      });
-    }
-    return decodedToken;
-  }
-
-  /**
-   * Checks if the decoded token is valid RPT by checking the permissions claim.
-   * @param token Decoded JWT token.
-   */
-  private isValidRPT(token: any): boolean {
-    return token && token.permissions;
+    return token ? this.jwtHelper.decodeToken(token) : undefined;
   }
 }
