@@ -1,12 +1,7 @@
-import { TestBed, async } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { PermissionService, Permission, UserRoleData } from './permission.service';
 import { HttpTestingController, HttpClientTestingModule } from '@angular/common/http/testing';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AUTH_API_URL } from '../shared/auth-api';
-import { AuthInterceptor } from '../shared/auth.interceptor';
-import { Broadcaster } from 'ngx-base';
-import { WIT_API_PROXY } from '../shared/wit-api';
-import { SSO_API_URL } from '../shared/sso-api';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { of } from 'rxjs';
 
@@ -21,32 +16,32 @@ describe('Service: Permission Service', () => {
   let service: PermissionService;
   let httpTestingController: HttpTestingController;
 
-  const fakeUser1 = {
+  const fakeUser1: UserRoleData = {
     assignee_id: 'user-1',
     assignee_type: 'something',
     inherited: false,
     inherited_from: 'something',
     role_name: 'role-1'
-  };
+  } as UserRoleData;
 
-  const fakeUser2 = {
+  const fakeUser2: UserRoleData = {
     assignee_id: 'user-2',
     assignee_type: 'something',
     inherited: false,
     inherited_from: 'something',
     role_name: 'role-1'
-  };
+  } as UserRoleData;
 
-  const fakeUsers = [fakeUser1, fakeUser2];
+  const fakeUsers: UserRoleData[] = [fakeUser1, fakeUser2];
 
-  const fakePermission = {
+  const fakePermission: Permission = {
     'resource_set_name': null,
     'resource_set_id': 'c0ee2b94-aee3-4c41-9e15-6fa330ce8e0b',
     'scopes': [
       'lima'
     ],
     'exp': 1535500572
-  };
+  } as Permission;
 
 
   beforeEach(() => {
@@ -54,15 +49,7 @@ describe('Service: Permission Service', () => {
       imports: [ HttpClientTestingModule ],
       providers: [
         PermissionService,
-        {
-          provide: HTTP_INTERCEPTORS,
-          useClass: AuthInterceptor,
-          multi: true
-        },
-        { provide: WIT_API_PROXY, useValue: 'http://wit.example.com/'},
-        { provide: AUTH_API_URL, useValue: 'http://auth.example.com/'},
-        { provide: SSO_API_URL, useValue: 'http://sso.example.com/'},
-        Broadcaster
+        { provide: AUTH_API_URL, useValue: 'http://auth.example.com/'}
       ]
     });
     service = TestBed.get(PermissionService);

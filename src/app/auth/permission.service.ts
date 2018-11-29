@@ -36,7 +36,7 @@ export class PermissionService {
    */
   getAllScopes(resourceId: string): Observable<string[]> {
     return this.getPermission(resourceId).pipe(
-      map((permission: Permission) => permission.scopes)
+      map((permission: Permission | undefined) => permission.scopes)
     );
   }
 
@@ -47,7 +47,7 @@ export class PermissionService {
    */
   hasScope(resourceId: string, scope: string): Observable<boolean> {
     return this.getPermission(resourceId).pipe(
-      map((permission: Permission) => permission.scopes.includes(scope))
+      map((permission: Permission | undefined) => permission.scopes.includes(scope))
     );
   }
 
@@ -71,7 +71,7 @@ export class PermissionService {
    * @param roleName Role to be assigned for the resource
    * @param userIDs IDs for users that need to be assigned the specified role.
    */
-  assignRole(resourceId: string, roleName: string, userIDs: Array<string>): Observable<any> {
+  assignRole(resourceId: string, roleName: string, userIDs: Array<string>): Observable<string> {
     const url = `${this.authApi}resources/${resourceId}/roles`;
     const payload = {
       data: [
@@ -90,9 +90,9 @@ export class PermissionService {
   getUsersByRole(resourceId: string, roleName: string): Observable<UserRoleData[]> {
     const url = `${this.authApi}resources/${resourceId}/roles/${roleName}`;
     return this.http
-      .get(url, { headers: this.headers })
+      .get<{data: UserRoleData[]}>(url, { headers: this.headers })
       .pipe(
-        map((res: { data: UserRoleData[] }): UserRoleData[] => res.data)
+        map(res => res.data)
       );
   }
 
@@ -105,9 +105,9 @@ export class PermissionService {
     const url = `${this.authApi}token/audit`;
     const params = new HttpParams().set('resource_id', resourceId);
     return this.http
-      .post(url, '', { headers: this.headers, params })
+      .post<{'rpt_token': string} | undefined>(url, '', { headers: this.headers, params })
       .pipe(
-        map((res: {'rpt_token': string} | undefined): Permission | undefined => {
+        map((res): Permission | undefined => {
           if (res) {
             this.saveRPT(res.rpt_token);
             return this.findPermission(this.getDecodedToken(), resourceId);
