@@ -63,32 +63,37 @@ describe('Service: Permission Service', () => {
     httpTestingController.verify();
   });
 
-  it('should return permission for a resource', () => {
+  it('should return permission for a resource', (done: DoneFn) => {
     service.getPermission(fakeResourceId).subscribe((permission: Permission) => {
       expect(permission.resource_set_id).toBe(fakeResourceId);
+      done();
     });
   });
 
-  it('should check for scope for a resource', () => {
+  it('should check for scope for a resource', (done: DoneFn) => {
     service.hasScope(fakeResourceId, 'lima').subscribe((res: boolean) => {
       expect(res).toBe(true);
+      done();
     });
     service.hasScope(fakeResourceId, 'bean').subscribe((res: boolean) => {
       expect(res).toBe(false);
+      done();
     });
   });
 
-  it('should return all scopes for a resource', () => {
+  it('should return all scopes for a resource', (done: DoneFn) => {
     service.getAllScopes(fakeResourceId).subscribe((scopes: string[]) => {
       expect(scopes.length).toBe(1);
       expect(scopes.includes('lima')).toBe(true);
+      done();
     });
   });
 
-  it('should audit RPT if the auth_token saved in localStorage is not valid RPT', () => {
+  it('should audit RPT if the auth_token saved in localStorage is not valid RPT', (done: DoneFn) => {
     localStorage.setItem('auth_token', fakeAuthToken);
     service.getPermission(fakeResourceId).subscribe((permission: Permission) => {
       expect(permission.resource_set_id).toBe(fakeResourceId);
+      done();
     });
 
     const req = httpTestingController.expectOne(`${authUrl}token/audit?resource_id=${fakeResourceId}`);
@@ -96,9 +101,10 @@ describe('Service: Permission Service', () => {
     req.flush({ 'rpt_token': fakeRptToken });
   });
 
-  it('should audit RPT if the RPT does not have permission for required resource', () => {
+  it('should audit RPT if the RPT does not have permission for required resource', (done: DoneFn) => {
     service.getPermission('some-resource-id').subscribe((permission: Permission) => {
       expect(permission).toBeUndefined();
+      done();
     });
 
     const req = httpTestingController.expectOne(`${authUrl}token/audit?resource_id=some-resource-id`);
@@ -106,37 +112,42 @@ describe('Service: Permission Service', () => {
     req.flush('');
   });
 
-  it('should check if findPermissionAfterAudit is called if localStorage has invalid RPT', () => {
+  it('should check if findPermissionAfterAudit is called if localStorage has invalid RPT', (done: DoneFn) => {
     localStorage.setItem('auth_token', fakeAuthToken);
     spyOn(service, 'findPermissionAfterAudit').and.returnValue(of(fakePermission));
     service.getPermission(fakeResourceId).subscribe((permission: Permission) => {
       expect(permission.resource_set_id).toBe(fakeResourceId);
+      done();
     });
     expect(service.findPermissionAfterAudit).toHaveBeenCalledWith(fakeResourceId);
     expect(service.findPermissionAfterAudit).toHaveBeenCalledTimes(1);
   });
 
-  it('should check if findPermissionAfterAudit is called if permission is not found', () => {
+  it('should check if findPermissionAfterAudit is called if permission is not found', (done: DoneFn) => {
     spyOn(service, 'findPermissionAfterAudit').and.returnValue(of(undefined));
     service.getPermission('some-resource-id').subscribe((permission: Permission) => {
       expect(permission).toBeUndefined();
+      done();
     });
     expect(service.findPermissionAfterAudit).toHaveBeenCalledWith('some-resource-id');
     expect(service.findPermissionAfterAudit).toHaveBeenCalledTimes(1);
   });
 
-  it('should assign a role to users', () => {
-    service.assignRole(fakeResourceId, 'admin', ['user-1', 'user-2']).subscribe();
+  it('should assign a role to users', (done: DoneFn) => {
+    service.assignRole(fakeResourceId, 'admin', ['user-1', 'user-2']).subscribe(
+      () => done()
+    );
 
     const req = httpTestingController.expectOne(`${authUrl}resources/${fakeResourceId}/roles`);
     expect(req.request.method).toBe('PUT');
     req.flush('');
   });
 
-  it('should get all users with a specific role', () => {
+  it('should get all users with a specific role', (done: DoneFn) => {
     service.getUsersByRole(fakeResourceId, 'admin')
       .subscribe((users: UserRoleData[]) => {
         expect(users).toBe(fakeUsers);
+        done();
       });
 
     const req = httpTestingController.expectOne(`${authUrl}resources/${fakeResourceId}/roles/admin`);
@@ -144,10 +155,11 @@ describe('Service: Permission Service', () => {
     req.flush({ data: fakeUsers });
   });
 
-  it('should return permission from new decoded RPT after audit', () => {
+  it('should return permission from new decoded RPT after audit', (done: DoneFn) => {
     service.findPermissionAfterAudit(fakeResourceId).subscribe((permission: Permission | undefined) => {
       expect(localStorage.getItem('auth_token')).toBe(fakeRptToken);
       expect(permission).toEqual(fakePermission);
+      done();
     });
 
     const req = httpTestingController.expectOne(`${authUrl}token/audit?resource_id=${fakeResourceId}`);
@@ -155,11 +167,12 @@ describe('Service: Permission Service', () => {
     req.flush({ 'rpt_token': fakeRptToken });
   });
 
-  it('should return undefined when no new RPT info is there after audit', () => {
+  it('should return undefined when no new RPT info is there after audit', (done: DoneFn) => {
     localStorage.setItem('auth_token', fakeAuthToken);
     service.findPermissionAfterAudit(fakeResourceId).subscribe((permission: Permission | undefined) => {
       expect(localStorage.getItem('auth_token')).toBe(fakeAuthToken);
       expect(permission).toEqual(undefined);
+      done();
     });
 
     const req = httpTestingController.expectOne(`${authUrl}token/audit?resource_id=${fakeResourceId}`);
