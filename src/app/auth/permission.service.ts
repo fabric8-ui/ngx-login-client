@@ -36,7 +36,9 @@ export class PermissionService {
    */
   getAllScopes(resourceId: string): Observable<string[]> {
     return this.getPermission(resourceId).pipe(
-      map((permission: Permission | undefined) => permission.scopes)
+      map((permission: Permission | undefined) => {
+        return permission && permission.scopes;
+      })
     );
   }
 
@@ -47,7 +49,9 @@ export class PermissionService {
    */
   hasScope(resourceId: string, scope: string): Observable<boolean> {
     return this.getPermission(resourceId).pipe(
-      map((permission: Permission | undefined) => permission.scopes.includes(scope))
+      map((permission: Permission | undefined) => {
+        return permission  && permission.scopes ? permission.scopes.includes(scope) : false;
+      })
     );
   }
 
